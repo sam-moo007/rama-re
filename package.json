@@ -1,0 +1,24 @@
+{
+  "name": "rama-real-estate",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm --recursive --sort run build",
+    "predev": "node scripts/check-dev-ports.mjs",
+    "dev": "pnpm --recursive --parallel run dev",
+    "lint": "pnpm --recursive --sort run lint",
+    "test": "pnpm --recursive --sort run test",
+    "test:a11y": "pnpm --recursive --sort run test:a11y",
+    "typecheck": "pnpm --recursive --sort run typecheck",
+    "format:check": "pnpm --recursive --sort run format:check",
+    "clean": "pnpm --recursive --parallel run clean"
+  },
+  "devDependencies": {
+    "turbo": "2.10.5",
+    "typescript": "5.9.3"
+  }
+}

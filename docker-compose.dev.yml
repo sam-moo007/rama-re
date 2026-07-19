@@ -1,0 +1,47 @@
+# RAMA — Full Local Dev Stack
+# Includes: Redis, Jaeger (OTEL)
+# NOTE: PostgreSQL and Object Storage are served by Supabase (cloud).
+#       Run this for services that still need to run locally.
+#
+# Usage:
+#   docker compose -f docker-compose.dev.yml up -d
+#   docker compose -f docker-compose.dev.yml down
+#
+# Then start the apps:
+#   pnpm --filter api dev
+#   pnpm --filter web dev
+
+services:
+  # ── Redis ────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: rama-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ── Jaeger (OpenTelemetry Collector + UI) ─────────────────────────────────────
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    container_name: rama-jaeger
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"  # Jaeger UI  → http://localhost:16686
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP  ← set OTEL_EXPORTER_OTLP_ENDPOINT
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:16686"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+networks:
+  default:
+    name: rama-dev

@@ -1,0 +1,4 @@
+external_id,property_slug,claim_key,evidence_class,retrieved_at,payload_json
+mock_ext_001,rp-12345,fact.ownership.dld_title,registry_regulator,2026-07-18T10:00:00Z,"{""titleNumber"": ""DLD-999123"", ""ownerType"": ""individual""}"
+mock_ext_002,rp-67890,fact.physical.view,on_site_observed,2026-07-18T11:00:00Z,"{""viewDirection"": ""sea"", ""unobstructed"": true}"
+mock_ext_003,rp-12345,fact.financial.service_charge,document_verified,2026-07-18T12:00:00Z,"{""amount"": 15400.0, ""currency"": ""AED"", ""period"": ""annual""}"

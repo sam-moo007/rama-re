@@ -1,0 +1,74 @@
+import { Meta, ColorPalette, ColorItem, Typeset } from "@storybook/addon-docs/blocks";
+
+<Meta title="Tokens/Design Tokens" />
+
+# Design Tokens
+
+## Brand Colors
+
+<ColorPalette>
+  <ColorItem
+    title="Ink"
+    subtitle="Primary text and dark elements"
+    colors={{ Ink: "var(--ink)", "Ink Soft": "var(--ink-soft)", "Ink Muted": "var(--ink-muted)" }}
+  />
+  <ColorItem
+    title="Limestone & Bone"
+    subtitle="Backgrounds"
+    colors={{ Limestone: "var(--limestone)", Bone: "var(--bone)" }}
+  />
+  <ColorItem
+    title="Sage"
+    subtitle="Success & Progress"
+    colors={{ Sage: "var(--sage)", "Sage Tint": "var(--sage-tint)" }}
+  />
+  <ColorItem
+    title="Copper"
+    subtitle="Primary Actions"
+    colors={{ Copper: "var(--copper)", "Copper Dark": "var(--copper-dark)", "Copper Tint": "var(--copper-tint)" }}
+  />
+  <ColorItem
+    title="Ochre"
+    subtitle="Review & Pending"
+    colors={{ Ochre: "var(--ochre)", "Ochre Tint": "var(--ochre-tint)" }}
+  />
+  <ColorItem
+    title="Unknown"
+    subtitle="Missing or unverified"
+    colors={{ Unknown: "var(--unknown)", "Unknown Tint": "var(--unknown-tint)" }}
+  />
+  <ColorItem
+    title="Risk"
+    subtitle="Errors & Destructive"
+    colors={{ Risk: "var(--risk)", "Risk Tint": "var(--risk-tint)" }}
+  />
+</ColorPalette>
+
+## Typography
+
+### Font Families
+
+**Sans-serif** (Inter): `var(--font-sans)`  
+**Heading** (Public Sans): `var(--font-heading)`
+
+### Typeset - Sans (Body)
+
+<Typeset
+  fontSizes={[
+    "0.64rem", "0.75rem", "0.88rem", "1rem", "1.25rem", "1.5rem"
+  ]}
+  fontWeight="400"
+  sampleText="The quick brown fox jumps over the lazy dog."
+  fontFamily="var(--font-sans), sans-serif"
+/>
+
+### Typeset - Heading
+
+<Typeset
+  fontSizes={[
+    "1.5rem", "2rem", "3rem", "4rem"
+  ]}
+  fontWeight="500"
+  sampleText="Dubai Real Estate Market"
+  fontFamily="var(--font-heading), serif"
+/>
