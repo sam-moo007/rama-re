@@ -15,14 +15,15 @@ const config: StorybookConfig = {
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
   ],
   "addons": [
-    getAbsolutePath('@storybook/addon-links'),
+    getAbsolutePath('@chromatic-com/storybook'),
+    getAbsolutePath('@storybook/addon-vitest'),
+    getAbsolutePath('@storybook/addon-a11y'),
     getAbsolutePath('@storybook/addon-essentials'),
-    getAbsolutePath('@storybook/addon-interactions')
+    getAbsolutePath('@storybook/addon-interactions'),
+    getAbsolutePath('@storybook/addon-links'),
+    getAbsolutePath('@storybook/addon-mcp')
   ],
-  "framework": {
-    "name": getAbsolutePath('@storybook/nextjs'),
-    "options": {}
-  },
+  "framework": getAbsolutePath('@storybook/nextjs-vite'),
   "staticDirs": [
     "..\\public"
   ]
