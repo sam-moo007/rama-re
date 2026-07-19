@@ -48,6 +48,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
+    "@chromatic-com/storybook": "^5.2.1",
     "@playwright/test": "^1.61.1",
     "@storybook/addon-essentials": "^8.6.0",
     "@storybook/addon-interactions": "^8.6.0",
