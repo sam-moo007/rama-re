@@ -20,11 +20,5 @@
   "devDependencies": {
     "turbo": "2.10.5",
     "typescript": "5.9.3"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@nestjs/core",
-      "@nestjs/cli"
-    ]
   }
 }
