@@ -25,6 +25,7 @@ RUN pnpm install --frozen-lockfile
 
 # Build the project
 COPY --from=builder /app/out/full/ .
+COPY tsconfig.base.json tsconfig.base.json
 COPY turbo.json turbo.json
 RUN pnpm turbo run build --filter=@rama/web...
 
