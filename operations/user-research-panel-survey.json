@@ -1,0 +1,48 @@
+{
+  "title": "RAMA UI/UX Beta Panel Screening",
+  "settings": {
+    "language": "en",
+    "progressBar": true
+  },
+  "fields": [
+    {
+      "id": "q1",
+      "title": "Are you a UAE resident looking to purchase or rent property in Dubai within the next 12 months?",
+      "type": "multiple_choice",
+      "properties": {
+        "choices": [
+          { "label": "Yes, looking to buy" },
+          { "label": "Yes, looking to rent" },
+          { "label": "No" }
+        ]
+      }
+    },
+    {
+      "id": "q2",
+      "title": "ما هي لغتك المفضلة لاستخدام التطبيقات العقارية؟ (What is your preferred language for real estate apps?)",
+      "type": "multiple_choice",
+      "properties": {
+        "choices": [
+          { "label": "English" },
+          { "label": "العربية (Arabic)" },
+          { "label": "Both interchangeably" }
+        ]
+      }
+    },
+    {
+      "id": "q3",
+      "title": "When viewing a property online, what is the #1 feature you feel is missing from current platforms (e.g. PropertyFinder, Bayut)?",
+      "type": "short_text"
+    },
+    {
+      "id": "q4",
+      "title": "Would you be willing to participate in a 45-minute recorded Zoom usability test of the RAMA prototype?",
+      "type": "yes_no"
+    },
+    {
+      "id": "q5",
+      "title": "Please provide your email to receive the beta access link and compensation details.",
+      "type": "email"
+    }
+  ]
+}

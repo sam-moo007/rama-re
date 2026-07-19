@@ -1,0 +1,16 @@
+{
+  "name": "RAMA Real-Estate",
+  "short_name": "RAMA",
+  "description": "A trust-first Dubai real-estate platform.",
+  "start_url": "/en",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#18181b",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}
