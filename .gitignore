@@ -20,3 +20,5 @@ Thumbs.db
 # Archives and Agents
 tests_archive/
 .agents/
+playwright-report/
+storybook-static/

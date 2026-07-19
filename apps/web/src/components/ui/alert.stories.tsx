@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { Alert, AlertTitle, AlertDescription } from "./alert";
 import { Info } from "lucide-react";
 

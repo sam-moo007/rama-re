@@ -1,6 +1,10 @@
-import type { StorybookConfig } from '@storybook/nextjs';
+// This file has been automatically migrated to valid ESM format by Storybook.
+import { createRequire } from "node:module";
+import type { StorybookConfig } from '@storybook/nextjs-vite';
 
 import { join, dirname } from "path"
+
+const require = createRequire(import.meta.url);
 
 /**
 * This function is used to resolve the absolute path of a package.
@@ -18,10 +22,9 @@ const config: StorybookConfig = {
     getAbsolutePath('@chromatic-com/storybook'),
     getAbsolutePath('@storybook/addon-vitest'),
     getAbsolutePath('@storybook/addon-a11y'),
-    getAbsolutePath('@storybook/addon-essentials'),
-    getAbsolutePath('@storybook/addon-interactions'),
     getAbsolutePath('@storybook/addon-links'),
-    getAbsolutePath('@storybook/addon-mcp')
+    getAbsolutePath('@storybook/addon-mcp'),
+    getAbsolutePath("@storybook/addon-docs")
   ],
   "framework": getAbsolutePath('@storybook/nextjs-vite'),
   "staticDirs": [
