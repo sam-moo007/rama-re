@@ -2,7 +2,7 @@
 import { createRequire } from "node:module";
 import type { StorybookConfig } from '@storybook/nextjs-vite';
 
-import { join, dirname } from "path"
+import { dirname } from "path"
 
 const require = createRequire(import.meta.url);
 
@@ -28,7 +28,7 @@ const config: StorybookConfig = {
   ],
   "framework": getAbsolutePath('@storybook/nextjs-vite'),
   "staticDirs": [
-    "..\\public"
+    "../public"
   ]
 };
 export default config;
