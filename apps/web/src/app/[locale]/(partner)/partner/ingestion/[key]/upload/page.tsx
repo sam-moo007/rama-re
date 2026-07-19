@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function UploadPage({ params: { locale, key } }: { params: { locale: string, key: string } }) {
+export default function UploadPage({ params }: { params: Promise<{ locale: string, key: string }> }) {
+  const { locale, key } = use(params);
   const router = useRouter();
   const sourceKey = decodeURIComponent(key);
   
