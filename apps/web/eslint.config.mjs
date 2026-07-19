@@ -14,7 +14,9 @@ export default defineConfig([
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-require-imports": "off",
-      "react-hooks/set-state-in-effect": "off"
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/purity": "off",
+      "storybook/no-renderer-packages": "off"
     }
   }
 ]);
