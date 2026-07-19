@@ -16,7 +16,8 @@ export default defineConfig([
       "@typescript-eslint/no-require-imports": "off",
       "react-hooks/set-state-in-effect": "off",
       "react-hooks/purity": "off",
-      "storybook/no-renderer-packages": "off"
+      "storybook/no-renderer-packages": "off",
+      "react-hooks/error-boundaries": "off"
     }
   }
 ]);
