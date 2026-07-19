@@ -72,7 +72,7 @@ export class EvidenceOperationsService {
   async review(id: string, input: unknown, actor: RamaActor): Promise<EvidenceWorkItem> {
     const command = this.parse(ReviewEvidenceCommandSchema, input);
     const item = await this.getVersioned(id, command.expectedVersion);
-    if (["expired", "superseded"].includes(item.workflowStatus)) {
+    if (["expired", "superseded", "published"].includes(item.workflowStatus)) {
       throw new ConflictException(`Cannot review evidence in '${item.workflowStatus}' state.`);
     }
 
@@ -164,7 +164,6 @@ export class EvidenceOperationsService {
     }
 
     const now = new Date().toISOString();
-    await this.transition(current, "superseded", "superseded", actor.id, command.reason, now);
 
     const replacementId = randomUUID();
     const replacement = EvidenceWorkItemSchema.parse({
@@ -196,7 +195,9 @@ export class EvidenceOperationsService {
         },
       ],
     });
-    return this.persist(replacement, null);
+    
+    await this.persist(replacement, null);
+    return this.transition(current, "superseded", "superseded", actor.id, command.reason, now);
   }
 
   private async getVersioned(id: string, expectedVersion: number): Promise<EvidenceWorkItem> {

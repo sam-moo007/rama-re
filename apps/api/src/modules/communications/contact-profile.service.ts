@@ -70,6 +70,10 @@ export class ContactProfileService {
     if (point.verificationRequestedAt && Date.parse(point.verificationRequestedAt) > now.getTime() - 60_000) throw new ConflictException({ code: "VERIFICATION_RATE_LIMITED" });
     const code = randomInt(0, 1_000_000).toString().padStart(6, "0");
     const expiresAt = new Date(now.getTime() + 10 * 60_000).toISOString();
+    const updatedPoint: ProtectedContactPoint = { ...point, status: "verification_pending", verificationCodeHash: this.cipher.verificationHash(current.id, command.channel, code), verificationExpiresAt: expiresAt, verificationAttempts: 0, verificationRequestedAt: now.toISOString(), verifiedAt: null };
+    const next = this.withPoint(current, command.channel, updatedPoint, "verification_requested", now.toISOString());
+    const saved = await this.save(next, current.version);
+    
     await this.delivery.sendVerification({
       channel: command.channel,
       target: this.cipher.decrypt(point.encryptedValue),
@@ -77,9 +81,7 @@ export class ContactProfileService {
       expiresAt,
       idempotencyKey: `${current.id}:${command.channel}:${current.version + 1}`,
     });
-    const updatedPoint: ProtectedContactPoint = { ...point, status: "verification_pending", verificationCodeHash: this.cipher.verificationHash(current.id, command.channel, code), verificationExpiresAt: expiresAt, verificationAttempts: 0, verificationRequestedAt: now.toISOString(), verifiedAt: null };
-    const next = this.withPoint(current, command.channel, updatedPoint, "verification_requested", now.toISOString());
-    const saved = await this.save(next, current.version);
+    
     return ContactVerificationRequestResponseSchema.parse({ profile: this.publicProfile(saved), channel: command.channel, expiresAt, developmentCode: this.delivery.development ? code : null });
   }
 

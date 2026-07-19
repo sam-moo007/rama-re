@@ -14,6 +14,9 @@ export class AiService {
   // For MVP, we simulate bounded retrieval.
   
   async queryWithRetrieval(messages: ChatMessage[], propertyId: string) {
+    if (!Array.isArray(messages)) {
+      throw new Error("Invalid messages payload: expected an array");
+    }
     this.logger.log(`Performing retrieval-augmented query for property ${propertyId}`);
     
     const lastUserMessage = messages.filter(m => m.role === "user").pop();

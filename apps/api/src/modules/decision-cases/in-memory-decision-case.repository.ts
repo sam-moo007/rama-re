@@ -27,6 +27,13 @@ export class InMemoryDecisionCaseRepository implements DecisionCaseRepository {
     if (currentVersion !== expectedVersion || parsed.version !== (expectedVersion ?? 0) + 1) {
       throw new DecisionCaseConflictError(parsed.id, expectedVersion, currentVersion);
     }
+    if (current) {
+      for (let i = 0; i < current.auditTrail.length; i++) {
+        if (parsed.auditTrail[i]?.id !== current.auditTrail[i]?.id) {
+          throw new Error("Audit trail history cannot be mutated.");
+        }
+      }
+    }
     const appended = parsed.auditTrail.filter((event) => expectedVersion === null || event.version > expectedVersion);
     if (appended.length !== 1 || appended[0]?.version !== parsed.version) {
       throw new Error("Each decision-case save must append exactly one audit event.");

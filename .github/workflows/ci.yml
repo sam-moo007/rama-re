@@ -22,7 +22,6 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 9
           run_install: false
           
       - name: Get pnpm store directory
@@ -65,8 +64,6 @@ jobs:
           
       - name: Install pnpm
         uses: pnpm/action-setup@v3
-        with:
-          version: 9
           
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -94,8 +91,6 @@ jobs:
         
       - name: Install pnpm
         uses: pnpm/action-setup@v3
-        with:
-          version: 9
           
       - name: Run Audit
         run: pnpm audit --audit-level=critical
@@ -109,8 +104,6 @@ jobs:
         
       - name: Install pnpm
         uses: pnpm/action-setup@v3
-        with:
-          version: 9
           
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

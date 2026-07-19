@@ -9,7 +9,7 @@ import {
 import { config as loadEnvironment } from "dotenv";
 import { resolve } from "node:path";
 
-import { AppModule } from "./app.module";
+// AppModule will be dynamically imported after dotenv loads
 
 const workspaceRoot = resolve(__dirname, "../../..");
 loadEnvironment({
@@ -18,6 +18,7 @@ loadEnvironment({
 });
 
 async function bootstrap(): Promise<void> {
+  const { AppModule } = await import("./app.module");
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ logger: false }),

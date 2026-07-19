@@ -63,7 +63,7 @@ export class RemoteJwksProvider implements JwksProvider {
 
   private async load(force: boolean): Promise<CachedJwks> {
     if (!force && this.cache && this.cache.expiresAt > Date.now()) return this.cache;
-    if (!force && this.loading) return this.loading;
+    if (this.loading) return this.loading;
     const task = this.fetchJwks();
     this.loading = task;
     try {
@@ -105,8 +105,9 @@ export class OidcJwtIdentityVerifier implements IdentityVerifier {
 
   async authenticate(request: IdentityRequest): Promise<RamaActor> {
     const authorization = this.single(request.headers.authorization);
-    if (!authorization?.startsWith("Bearer ")) throw this.unauthorized();
-    const token = authorization.slice(7);
+    const schemeMatch = /^\s*Bearer\s+/i.exec(authorization ?? "");
+    if (!schemeMatch) throw this.unauthorized();
+    const token = authorization!.slice(schemeMatch[0].length);
     if (!token || token.length > 16_384) throw this.unauthorized();
 
     try {
