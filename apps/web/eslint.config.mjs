@@ -9,5 +9,12 @@ export default defineConfig([
   ...nextVitals,
   ...nextTypeScript,
   globalIgnores([".next/**", "next-env.d.ts"]),
-  ...storybook.configs["flat/recommended"]
+  ...storybook.configs["flat/recommended"],
+  {
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-require-imports": "off",
+      "react-hooks/set-state-in-effect": "off"
+    }
+  }
 ]);

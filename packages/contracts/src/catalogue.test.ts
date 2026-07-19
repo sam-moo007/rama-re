@@ -10,7 +10,7 @@ import { catalogueFixtures } from "./fixtures/catalogue";
 
 describe("catalogue contracts", () => {
   it("accepts curated and explicitly synthetic catalogue records", () => {
-    expect(catalogueFixtures.map((record) => PropertyCatalogueRecordSchema.parse(record))).toHaveLength(4);
+    expect(catalogueFixtures.map((record) => PropertyCatalogueRecordSchema.parse(record))).toHaveLength(7);
     expect(catalogueFixtures.filter((record) => record.recordKind === "synthetic_demo")).toHaveLength(3);
   });
 

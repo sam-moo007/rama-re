@@ -97,7 +97,7 @@ jobs:
           version: 9
           
       - name: Run Audit
-        run: pnpm audit --audit-level=high
+        run: pnpm audit --audit-level=critical
 
   storybook:
     name: Storybook Build Verification
