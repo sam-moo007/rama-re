@@ -62,7 +62,7 @@ const Card = ({
           scale,
           top: `calc(-5vh + ${i * 25}px)`,
         }}
-        className="relative flex h-[500px] w-[90%] max-w-[1000px] flex-col border border-border shadow-sm p-10 lg:p-14 text-ink [transform-origin:top] overflow-hidden"
+        className="relative flex min-h-[500px] lg:h-[500px] w-[90%] max-w-[1000px] flex-col border border-border shadow-sm p-10 lg:p-14 text-ink [transform-origin:top] overflow-y-auto"
       >
         <h2 className="m-0 text-center text-3xl font-serif font-light tracking-tight">{title}</h2>
         <div className="mt-10 flex h-full gap-8 lg:gap-12 flex-col lg:flex-row items-center lg:items-start">

@@ -35,10 +35,10 @@ export function AppFooter({ locale }: AppFooterProps) {
       { label: isAr ? "بوابة الشركاء" : "Partner Portal", href: `/${locale}/partner/ingestion` },
     ],
     legal: [
-      { label: isAr ? "سياسة الخصوصية" : "Privacy Policy", href: "#" },
-      { label: isAr ? "الشروط والأحكام" : "Terms of Service", href: "#" },
-      { label: isAr ? "إفصاح دائرة الأراضي" : "DLD Disclosure", href: "#" },
-      { label: isAr ? "ملفات تعريف الارتباط" : "Cookie Policy", href: "#" },
+      { label: isAr ? "سياسة الخصوصية" : "Privacy Policy", href: `/${locale}/legal/privacy` },
+      { label: isAr ? "الشروط والأحكام" : "Terms of Service", href: `/${locale}/legal/terms` },
+      { label: isAr ? "إفصاح دائرة الأراضي" : "DLD Disclosure", href: `/${locale}/legal/disclosure` },
+      { label: isAr ? "ملفات تعريف الارتباط" : "Cookie Policy", href: `/${locale}/legal/cookies` },
     ],
   };
 

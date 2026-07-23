@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 export interface AnnouncementProps extends React.HTMLAttributes<HTMLDivElement> {
   href?: string;
@@ -7,15 +8,21 @@ export interface AnnouncementProps extends React.HTMLAttributes<HTMLDivElement> 
 
 export const Announcement = React.forwardRef<HTMLDivElement, AnnouncementProps>(
   ({ className, href, children, ...props }, ref) => {
+    const commonClasses = cn(
+      "inline-flex items-center gap-2.5 rounded-full border border-border bg-surface/95 px-3.5 py-1.5 text-xs text-ink transition-all duration-200 hover:border-brand/40 hover:bg-surface shadow-subtle cursor-pointer select-none",
+      className
+    );
+
+    if (href) {
+      return (
+        <Link href={href} className={commonClasses} {...(props as any)}>
+          {children}
+        </Link>
+      );
+    }
+
     return (
-      <div
-        ref={ref}
-        className={cn(
-          "inline-flex items-center gap-2.5 rounded-full border border-border bg-surface/95 px-3.5 py-1.5 text-xs text-ink transition-all duration-200 hover:border-brand/40 hover:bg-surface shadow-subtle cursor-pointer select-none",
-          className
-        )}
-        {...props}
-      >
+      <div ref={ref} className={commonClasses} {...props}>
         {children}
       </div>
     );

@@ -19,8 +19,7 @@ import { MagicCard } from "@/components/ui/magic-card";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { cn } from "@/lib/utils";
-
-
+import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +56,8 @@ export default async function HomeLocalePage({ params }: Props) {
   if (!isLocale(value)) notFound();
 
   const isAr = value === "ar";
+  const cookieStore = await cookies();
+  const isAuthenticated = cookieStore.has("__Host-rama-customer-token");
   const dir = isAr ? "rtl" : "ltr";
 
   // Featured listings — top 3 curated properties
@@ -71,7 +72,7 @@ export default async function HomeLocalePage({ params }: Props) {
       <div className="relative z-10 bg-canvas shadow-[0_20px_40px_rgba(0,0,0,0.1)] flex flex-col">
         
         {/* Navigation — sits above video hero */}
-        <AppHeader locale={value as any} variant="landing" />
+        <AppHeader locale={value as any} variant="landing" isAuthenticated={isAuthenticated} />
 
         {/* ── Hero: Full-viewport video background ───────────────────────── */}
         <section className="relative overflow-hidden bg-black h-[90vh] max-h-[720px] min-h-[500px] flex items-center border-b border-border">

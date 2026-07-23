@@ -11,9 +11,10 @@ interface AppHeaderProps {
   variant?: "default" | "landing" | "operations";
   title?: string;
   badge?: string;
+  isAuthenticated?: boolean;
 }
 
-export function AppHeader({ locale, variant = "default", title, badge }: AppHeaderProps) {
+export function AppHeader({ locale, variant = "default", title, badge, isAuthenticated = true }: AppHeaderProps) {
   const [menuState, setMenuState] = useState(false);
   const isAr = locale === "ar";
   const otherLocale = isAr ? "en" : "ar";
@@ -72,13 +73,22 @@ export function AppHeader({ locale, variant = "default", title, badge }: AppHead
           >
             {languageLabel}
           </Link>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="text-xs font-semibold text-text hover:text-critical transition-colors cursor-pointer bg-transparent border-none p-0"
-          >
-            {isAr ? "تسجيل الخروج" : "Sign out"}
-          </button>
+          {isAuthenticated ? (
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="text-xs font-semibold text-text hover:text-critical transition-colors cursor-pointer bg-transparent border-none p-0"
+            >
+              {isAr ? "تسجيل الخروج" : "Sign out"}
+            </button>
+          ) : (
+            <Link
+              href={`/${locale}/login` as any}
+              className="text-xs font-semibold text-text hover:text-brand transition-colors"
+            >
+              {isAr ? "تسجيل الدخول" : "Sign in"}
+            </Link>
+          )}
         </nav>
 
         {/* Mobile Menu Trigger */}
@@ -116,13 +126,23 @@ export function AppHeader({ locale, variant = "default", title, badge }: AppHead
             >
               {languageLabel}
             </Link>
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="text-sm font-medium text-critical bg-transparent border-none p-0 cursor-pointer"
-            >
-              {isAr ? "تسجيل الخروج" : "Sign out"}
-            </button>
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="text-sm font-medium text-critical bg-transparent border-none p-0 cursor-pointer"
+              >
+                {isAr ? "تسجيل الخروج" : "Sign out"}
+              </button>
+            ) : (
+              <Link
+                href={`/${locale}/login` as any}
+                onClick={() => setMenuState(false)}
+                className="text-sm font-medium text-brand"
+              >
+                {isAr ? "تسجيل الدخول" : "Sign in"}
+              </Link>
+            )}
           </div>
         </div>
       )}

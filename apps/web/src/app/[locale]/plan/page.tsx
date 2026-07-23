@@ -24,12 +24,12 @@ export default async function PlanPage({ params }: { params: Promise<{ locale: s
     {
       title: isAr ? "الموافقة المبدئية للتمويل" : "Mortgage pre-approval",
       description: isAr ? "تأكيد ميزانية الشراء مع المصرف قبل اختيار العقار" : "Confirm purchase budget limits with a bank pre-approval.",
-      completed: true,
+      completed: false,
     },
     {
       title: isAr ? "تأكيد الهوية والمستندات" : "Identity verification",
       description: isAr ? "رفع الهوية الإماراتية وجواز السفر لمراجعة متطلبات دائرة الأراضي" : "Upload Emirates ID and passport for land department compliance.",
-      completed: true,
+      completed: false,
     },
     {
       title: isAr ? "تحديد متطلبات الأسرة" : "Household requirements",
@@ -97,9 +97,9 @@ export default async function PlanPage({ params }: { params: Promise<{ locale: s
                   )}
                   {!step.completed && (
                     <div className="mt-2 sm:mt-0 shrink-0">
-                      <button className="text-[11px] font-bold uppercase tracking-wider text-[var(--copper-dark)] border border-[var(--copper)]/30 hover:bg-[var(--copper-tint)] px-4 py-2 transition-colors">
+                      <Link href={`/${locale}/plan`} className="text-[11px] font-bold uppercase tracking-wider text-[var(--copper-dark)] border border-[var(--copper)]/30 hover:bg-[var(--copper-tint)] px-4 py-2 transition-colors inline-block">
                         {isAr ? "تحديث" : "Update"}
-                      </button>
+                      </Link>
                     </div>
                   )}
                 </div>

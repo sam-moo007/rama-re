@@ -52,8 +52,12 @@ export async function proxy(request: NextRequest) {
     // Public feature pages (no account needed)
     pathname.startsWith("/en/cost-engine") ||
     pathname.startsWith("/ar/cost-engine") ||
+    pathname.startsWith("/en/costs") ||
+    pathname.startsWith("/ar/costs") ||
     pathname.startsWith("/en/readiness") ||
     pathname.startsWith("/ar/readiness") ||
+    pathname.startsWith("/en/plan") ||
+    pathname.startsWith("/ar/plan") ||
     // Property browsing — publicly viewable
     pathname.startsWith("/en/properties/") ||
     pathname.startsWith("/ar/properties/") ||

@@ -10,7 +10,7 @@ import {
   type PropertyDecisionRoom,
 } from "@rama/contracts";
 
-import { getCustomerApiHeaders } from "./customer-api-auth";
+import { getCustomerApiHeaders, CustomerSessionMissingError } from "./customer-api-auth";
 
 const apiUrl =
   process.env.RAMA_API_INTERNAL_URL ??
@@ -86,6 +86,9 @@ export async function getDiscoveryData(searchParams: DiscoverySearchParams): Pro
       shortlist: PropertyShortlistMineResponseSchema.parse(await shortlistResponse.json()),
     };
   } catch (error) {
+    if (error instanceof CustomerSessionMissingError) {
+      throw error;
+    }
     console.warn("API server unreachable, returning discovery fallback data:", error);
     return {
       search: {
@@ -164,6 +167,9 @@ export async function getCompareData(slugs: string[]): Promise<{
       shortlist: PropertyShortlistMineResponseSchema.parse(await shortlistResponse.json()),
     };
   } catch (error) {
+    if (error instanceof CustomerSessionMissingError) {
+      throw error;
+    }
     console.warn("API server unreachable, returning compare fallback data:", error);
     return {
       compare: {
