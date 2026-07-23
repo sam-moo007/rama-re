@@ -15,6 +15,7 @@ import {
   EXCHANGE_RATES,
   type Currency,
 } from "../lib/mortgage";
+import { defaultCostAssumptions } from "@/data/cost-assumptions";
 
 type CostScenarioLabProps = {
   locale: Locale;
@@ -63,8 +64,8 @@ export function CostScenarioLab({ locale, priceAed, annualServiceChargeAed }: Co
           font-weight: 700;
           letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: var(--ink-muted);
-          border-bottom: 1px solid var(--line);
+          color: var(--color-text, #383531);
+          border-bottom: 1px solid var(--color-border, #D4CEC5);
           padding-bottom: 6px;
           margin-bottom: 12px;
           display: flex;
@@ -82,16 +83,16 @@ export function CostScenarioLab({ locale, priceAed, annualServiceChargeAed }: Co
           }
         }
         .metricCard {
-          background: var(--bone);
-          border: 1px solid var(--line-strong);
-          padding: 18px;
+          background: transparent;
+          border-top: 1px solid var(--color-border, #D4CEC5);
+          padding-block: 18px;
         }
         .metricRow {
           display: flex;
           justify-content: space-between;
           font-size: 0.85rem;
           padding-block: 6px;
-          border-bottom: 1px dashed var(--line);
+          border-bottom: 1px dashed var(--color-border, #D4CEC5);
         }
         .metricRow:last-child {
           border-bottom: 0;
@@ -99,8 +100,31 @@ export function CostScenarioLab({ locale, priceAed, annualServiceChargeAed }: Co
         .metricValue {
           font-weight: 700;
           font-variant-numeric: tabular-nums;
+          color: var(--color-ink, #171717);
         }
       `}</style>
+
+      {/* Group 0: Cost Assumptions */}
+      <div>
+        <h4 className="labSectionHeader">
+          <Info size={14} />
+          {locale === "ar" ? "الافتراضات الأساسية" : "Baseline Assumptions"}
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {defaultCostAssumptions.map((assumption) => (
+            <div key={assumption.id} className="py-4 border-t border-line flex flex-col gap-1.5">
+              <div className="flex justify-between items-start">
+                <span className="font-bold text-sm text-ink">{assumption.label[locale]}</span>
+                <span className={`text-[10px] uppercase px-2 py-0.5 font-bold ${assumption.type === 'fixed' ? 'bg-ink text-white' : 'bg-surface-subtle text-muted border border-border'}`}>
+                  {assumption.type === 'fixed' ? (locale === "ar" ? "ثابت" : "Fixed") : (locale === "ar" ? "تقديري" : "Estimated")}
+                </span>
+              </div>
+              <span className="text-xs text-text">{assumption.description[locale]}</span>
+              <span className="text-xl font-mono font-bold text-ink mt-2">{assumption.valuePercentage}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Group 1: Mortgage Inputs */}
       <div>
@@ -162,7 +186,7 @@ export function CostScenarioLab({ locale, priceAed, annualServiceChargeAed }: Co
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-bold text-ink">{locale === "ar" ? "عرض العملة" : "Display Currency"}</span>
             <Select value={currency} onValueChange={(val) => { if (val) setCurrency(val); }}>
-              <SelectTrigger className="h-10 w-full border border-line-strong bg-white px-3 text-xs rounded-none">
+              <SelectTrigger className="h-10 w-full border border-line bg-transparent px-3 text-xs rounded-none">
                 <SelectValue placeholder="Currency" />
               </SelectTrigger>
               <SelectContent>
@@ -177,7 +201,7 @@ export function CostScenarioLab({ locale, priceAed, annualServiceChargeAed }: Co
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-bold text-ink">{locale === "ar" ? "فترة الاحتفاظ" : "Holding Period"}</span>
             <Select value={String(holdYears)} onValueChange={(val) => setHoldYears(Number(val))}>
-              <SelectTrigger className="h-10 w-full border border-line-strong bg-white px-3 text-xs rounded-none">
+              <SelectTrigger className="h-10 w-full border border-line bg-transparent px-3 text-xs rounded-none">
                 <SelectValue placeholder="Years" />
               </SelectTrigger>
               <SelectContent>

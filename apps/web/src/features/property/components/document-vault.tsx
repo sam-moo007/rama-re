@@ -70,10 +70,10 @@ export function DocumentVault({ locale }: DocumentVaultProps) {
             <div className="flex gap-2">
               {doc.verified ? (
                 <>
-                  <button className="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title={t.view}>
+                  <button className="p-2 text-ink hover:text-brand hover:bg-surface-subtle rounded transition-colors" title={t.view}>
                     <Eye size={18} />
                   </button>
-                  <button className="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title={t.download}>
+                  <button className="p-2 text-ink hover:text-brand hover:bg-surface-subtle rounded transition-colors" title={t.download}>
                     <Download size={18} />
                   </button>
                 </>

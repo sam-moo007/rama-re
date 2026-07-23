@@ -112,7 +112,7 @@ export default function UploadPage({ params }: { params: Promise<{ locale: strin
             accept=".csv"
             onChange={handleFileChange}
             disabled={uploading}
-            className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+            className="block w-full text-sm text-slate-900 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-900 hover:file:bg-slate-200 disabled:opacity-50"
           />
           <button
             onClick={handleUpload}

@@ -62,7 +62,7 @@ export default async function PropertyDecisionRoomPage({ params }: Props) {
               <TabsTrigger value="risks">
                 {isRtl ? "المخاطر" : "Risks"}
                 {property.risks.length > 0 && (
-                  <Badge variant="destructive" className="ml-2 rtl:mr-2 rtl:ml-0 h-5 w-5 p-0 flex items-center justify-center rounded-full">
+                  <Badge variant="destructive" className="ml-2 rtl:mr-2 rtl:ml-0 h-5 w-5 p-0 flex items-center justify-center rounded-none">
                     {property.risks.length}
                   </Badge>
                 )}

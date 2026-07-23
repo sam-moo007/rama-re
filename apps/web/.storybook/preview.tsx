@@ -1,10 +1,10 @@
 import type { Preview } from "@storybook/nextjs";
 import React from "react";
-import { Inter, Public_Sans } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 
 import "../src/app/globals.css";
 
-const publicSansHeading = Public_Sans({ subsets: ["latin"], variable: "--font-heading" });
+const playfairHeading = Playfair_Display({ subsets: ["latin"], variable: "--font-heading" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const preview: Preview = {
@@ -42,7 +42,7 @@ const preview: Preview = {
       return (
         <div
           dir={dir}
-          className={`${inter.variable} ${publicSansHeading.variable} font-sans min-h-screen`}
+          className={`${inter.variable} ${playfairHeading.variable} font-sans min-h-screen`}
         >
           <Story />
         </div>

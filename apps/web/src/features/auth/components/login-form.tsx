@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export function LoginForm({ locale }: { locale: string }) {
@@ -153,6 +154,12 @@ export function LoginForm({ locale }: { locale: string }) {
             ? "بتسجيل دخولك، أنت توافق على سياسة الخصوصية وشروط الاستخدام."
             : "By signing in, you agree to our Privacy Policy and Terms of Use."}
         </p>
+
+        <div style={{ marginTop: "1rem", textAlign: "center" }}>
+          <Link href={`/${locale}`} style={{ fontSize: "0.875rem", color: "var(--ink-muted)", textDecoration: "none" }}>
+            {isAr ? "العودة إلى الصفحة الرئيسية" : "← Go back home"}
+          </Link>
+        </div>
       </div>
     </div>
   );

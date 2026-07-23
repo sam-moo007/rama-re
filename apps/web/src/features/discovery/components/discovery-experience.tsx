@@ -14,20 +14,22 @@ import {
   Bookmark,
   Check,
   CircleAlert,
-  Clock3,
   GitCompareArrows,
   Home,
   LockKeyhole,
   MapPin,
   Search,
-  SlidersHorizontal,
   X,
+  MapIcon,
+  ListIcon,
 } from "lucide-react";
 import type { Route } from "next";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { getGuestShortlist, saveGuestShortlist, mergeGuestShortlist, clearGuestShortlist } from "@/lib/guest-state";
 import dynamic from "next/dynamic";
-import { MapIcon, ListIcon } from "lucide-react";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 const SearchMap = dynamic(
   () => import("@/features/search/search-map").then((mod) => mod.SearchMap),
@@ -35,14 +37,16 @@ const SearchMap = dynamic(
 );
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AppHeader } from "@/components/app-header";
+import { Container } from "@/components/ui/container";
 import type { Locale } from "@/lib/i18n";
+import { BlurFade } from "@/components/ui/blur-fade";
+import { MagicCard } from "@/components/ui/magic-card";
+import { NumberTicker } from "@/components/ui/number-ticker";
 
 type Props = {
   initialSearch: CatalogueSearchResponse;
@@ -58,10 +62,12 @@ const copy = {
     brand: "RAMA",
     secure: "Private discovery workspace",
     language: "العربية",
+    signOut: "Sign out",
     brief: "Household brief",
-    title: "Discover homes without filtering unknowns out of sight.",
-    intro: "Results use your latest saved brief, then show exactly where evidence matches, needs review, or is unavailable.",
-    nonAdvice: "Fit is decision support—not a property-quality score or investment recommendation.",
+    title: "Discover homes",
+    titleSub: "Verified properties with transparent evidence, costs, and location fit",
+    intro: "Results show exactly where details match, need review, or are pending.",
+    nonAdvice: "Fit is decision support — not a quality score or recommendation.",
     filters: "Search and filters",
     query: "Property or community",
     community: "Community",
@@ -91,9 +97,9 @@ const copy = {
     sort: "Sort results",
     apply: "Apply filters",
     reset: "Reset",
-    results: "homes in the current result set",
-    briefApplied: "Brief version applied",
-    noBrief: "No brief applied",
+    results: "homes match your search",
+    briefApplied: "",
+    noBrief: "",
     synthetic: "Synthetic demo",
     curated: "Curated",
     ready: "Ready",
@@ -102,8 +108,8 @@ const copy = {
     review: "Review",
     stale: "Stale",
     unknown: "Unknown",
-    bedroomsLabel: "bedrooms",
-    bathrooms: "bathrooms",
+    bedroomsLabel: "Bedrooms",
+    bathrooms: "Bathrooms",
     area: "Internal area",
     evidenceCoverage: "Evidence coverage",
     fit: "Brief fit",
@@ -117,8 +123,9 @@ const copy = {
     saving: "Saving…",
     compare: "Compare",
     compareSelected: "Compare selected",
-    compareHint: "Select 2–4 homes. Unknown values stay visible.",
-    compareLimit: "You can compare up to four homes.",
+    compareHint: "Select 2–3 homes to compare side-by-side.",
+    compareLimit: "You can compare up to three homes.",
+    tradeOffs: "Key trade-offs",
     shortlistSaved: "Shortlist updated.",
     saveFailed: "The shortlist changed or could not be saved. Refresh and try again.",
     compareFailed: "Comparison could not be loaded.",
@@ -131,15 +138,15 @@ const copy = {
     access: "Step-free access",
     representation: "Media representation",
     missingCount: "Missing critical evidence",
-    noResults: "No known matches",
-    noResultsHelp: "Widen a known filter. RAMA never converts unavailable evidence into a confirmed absence.",
+    noResults: "No homes match your search",
+    noResultsHelp: "Try adjusting your price or community filters.",
     mobility: "Travel evidence",
-    mobilityUnknown: "Route evidence is unavailable for this destination and mode. The home remains visible for review.",
+    mobilityUnknown: "Route evidence is unavailable for this destination and mode.",
     travelEstimate: "minutes",
     method: "Method",
     source: "Source",
     observed: "Observed",
-    routingCaution: "Travel times are evidence-labelled estimates, not guarantees. Present, committed and modelled infrastructure are kept distinct.",
+    routingCaution: "Travel times are evidence-labelled estimates, not guarantees.",
     showing: "Showing",
     of: "of",
     previous: "Previous results",
@@ -151,9 +158,11 @@ const copy = {
     brand: "راما",
     secure: "مساحة اكتشاف خاصة",
     language: "English",
+    signOut: "تسجيل الخروج",
     brief: "ملخص الأسرة",
-    title: "اكتشف المنازل من دون إخفاء المعلومات المجهولة.",
-    intro: "تستخدم النتائج أحدث ملخص محفوظ، ثم توضح أين تتطابق الأدلة أو تحتاج إلى مراجعة أو تكون غير متاحة.",
+    title: "اكتشف المنازل",
+    titleSub: "عقارات موثقة مع أدلة شفافة وتكاليف كاملة وملاءمة مكانية",
+    intro: "تُظهر النتائج أين تتطابق التفاصيل، تحتاج مراجعة، أو لا تزال معلقة.",
     nonAdvice: "الملاءمة أداة لدعم القرار وليست درجة لجودة العقار أو توصية استثمارية.",
     filters: "البحث وعوامل التصفية",
     query: "العقار أو المنطقة",
@@ -184,9 +193,9 @@ const copy = {
     sort: "ترتيب النتائج",
     apply: "تطبيق عوامل التصفية",
     reset: "إعادة الضبط",
-    results: "عقارات في مجموعة النتائج الحالية",
-    briefApplied: "إصدار الملخص المستخدم",
-    noBrief: "لم يتم تطبيق ملخص",
+    results: "منزل يطابق بحثك",
+    briefApplied: "",
+    noBrief: "",
     synthetic: "نموذج توضيحي",
     curated: "منسق",
     ready: "جاهز",
@@ -195,8 +204,8 @@ const copy = {
     review: "مراجعة",
     stale: "قديم",
     unknown: "غير معروف",
-    bedroomsLabel: "غرف نوم",
-    bathrooms: "حمامات",
+    bedroomsLabel: "غرف النوم",
+    bathrooms: "الحمامات",
     area: "المساحة الداخلية",
     evidenceCoverage: "اكتمال الأدلة",
     fit: "ملاءمة الملخص",
@@ -210,8 +219,9 @@ const copy = {
     saving: "جارٍ الحفظ…",
     compare: "مقارنة",
     compareSelected: "مقارنة المحدد",
-    compareHint: "حدد عقارين إلى أربعة. تبقى القيم المجهولة ظاهرة.",
-    compareLimit: "يمكنك مقارنة أربعة عقارات كحد أقصى.",
+    compareHint: "حدد عقارين إلى ثلاثة لمقارنتهما جنباً إلى جنب.",
+    compareLimit: "يمكنك مقارنة ثلاثة عقارات كحد أقصى.",
+    tradeOffs: "أهم المفاضلات",
     shortlistSaved: "تم تحديث القائمة المختصرة.",
     saveFailed: "تغيرت القائمة أو تعذر حفظها. حدّث الصفحة وحاول مجدداً.",
     compareFailed: "تعذر تحميل المقارنة.",
@@ -224,15 +234,15 @@ const copy = {
     access: "دخول بلا درجات",
     representation: "نوع تمثيل الوسائط",
     missingCount: "الأدلة الأساسية المفقودة",
-    noResults: "لا توجد مطابقات معروفة",
-    noResultsHelp: "وسّع أحد عوامل التصفية المعروفة. لا تحوّل راما الدليل غير المتاح إلى غياب مؤكد.",
+    noResults: "لا يوجد منزل يطابق بحثك",
+    noResultsHelp: "حاول تعديل خيارات السعر أو المنطقة لرؤية المزيد.",
     mobility: "دليل التنقل",
-    mobilityUnknown: "دليل المسار غير متاح لهذه الوجهة ووسيلة التنقل. يبقى العقار ظاهراً للمراجعة.",
+    mobilityUnknown: "دليل المسار غير متاح لهذه الوجهة ووسيلة التنقل.",
     travelEstimate: "دقيقة",
     method: "المنهج",
     source: "المصدر",
     observed: "تاريخ الرصد",
-    routingCaution: "أزمنة التنقل تقديرات موصوفة بالأدلة وليست ضمانات. تُفصل البنية القائمة والملتزم بها والنمذجة بوضوح.",
+    routingCaution: "أزمنة التنقل تقديرات موصوفة بالأدلة وليست ضمانات.",
     showing: "عرض",
     of: "من",
     previous: "النتائج السابقة",
@@ -241,20 +251,64 @@ const copy = {
   },
 } as const;
 
-const aed = (value: number, locale: Locale) => new Intl.NumberFormat(locale === "ar" ? "ar-AE" : "en-AE", { style: "currency", currency: "AED", maximumFractionDigits: 0 }).format(value);
+const aed = (value: number, locale: Locale) =>
+  new Intl.NumberFormat(locale === "ar" ? "ar-AE" : "en-AE", {
+    style: "currency",
+    currency: "AED",
+    maximumFractionDigits: 0,
+  }).format(value);
+
+const PROPERTY_IMAGE_MAP: Record<string, string> = {
+  "residence-1204": "/images/property-living-room.jpg",
+  "garden-court-805-demo": "/images/property-kitchen.jpg",
+  "marina-home-demo": "/images/property-marina-penthouse.jpg",
+  "canal-loft-demo": "/images/property-master-bedroom.jpg",
+  "marina-penthouse-5401": "/images/community-marina.jpg",
+  "palm-villa-b7": "/images/community-palm.jpg",
+  "downtown-penthouse-ph03": "/images/property-downtown-exterior.jpg",
+};
 
 export function DiscoveryExperience({ initialSearch, initialShortlist, locale }: Props) {
   const t = copy[locale];
   const router = useRouter();
   const rtl = locale === "ar";
   const [shortlist, setShortlist] = useState(initialShortlist);
+  const [isGuest] = useState(!initialShortlist);
   const [compareSlugs, setCompareSlugs] = useState<string[]>([]);
   const [comparison, setComparison] = useState<PropertyCompareResponse | null>(null);
   const [showAll, setShowAll] = useState(false);
   const [busySlug, setBusySlug] = useState<string | null>(null);
   const [comparing, setComparing] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
+
+  useEffect(() => {
+    const localSlugs = getGuestShortlist();
+    if (localSlugs.length > 0) {
+      if (initialShortlist) {
+        const merged = mergeGuestShortlist(initialShortlist.propertySlugs);
+        fetch("/api/customer/shortlists/mine", {
+          method: "PUT",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ expectedVersion: initialShortlist.version, propertySlugs: merged }),
+        })
+          .then((res) => {
+            if (res.ok) {
+              res.json().then((data) => {
+                setShortlist(PropertyShortlistSchema.parse(data));
+                clearGuestShortlist();
+              });
+            }
+          })
+          .catch((e) => console.error("Guest state merge failed", e));
+      } else {
+        setShortlist({ version: 1, propertySlugs: localSlugs } as PropertyShortlist);
+      }
+    }
+  }, [initialShortlist]);
+
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const isSimplified = isFeatureEnabled("NORDIC_SIMPLIFIED_DISCOVERY");
   const query = initialSearch.appliedQuery;
   const [filters, setFilters] = useState({
     q: query.q ?? "",
@@ -271,6 +325,7 @@ export function DiscoveryExperience({ initialSearch, initialShortlist, locale }:
     infrastructureState: query.infrastructureStates[0] ?? "all",
     sort: query.sort,
   });
+
   const { sponsoredItems, organicItems } = useMemo(() => {
     const sponsored: PropertySearchResultItem[] = [];
     const organic: PropertySearchResultItem[] = [];
@@ -306,16 +361,30 @@ export function DiscoveryExperience({ initialSearch, initialShortlist, locale }:
       if (filters.infrastructureState !== "all") params.set("infrastructureStates", filters.infrastructureState);
     }
     params.set("sort", filters.sort);
-    router.push(`/${locale}/discover?${params.toString()}` as Route);
+    router.push(`/${locale}/homes?${params.toString()}` as Route);
   };
 
-  const resetFilters = () => router.push(`/${locale}/discover` as Route);
-  const nextPage = () => { if (!initialSearch.pageInfo.nextCursor) return; const params=new URLSearchParams(window.location.search);params.set("cursor",initialSearch.pageInfo.nextCursor);router.push(`/${locale}/discover?${params.toString()}` as Route); };
+  const resetFilters = () => router.push(`/${locale}/homes` as Route);
+  const nextPage = () => {
+    if (!initialSearch.pageInfo.nextCursor) return;
+    const params = new URLSearchParams(window.location.search);
+    params.set("cursor", initialSearch.pageInfo.nextCursor);
+    router.push(`/${locale}/homes?${params.toString()}` as Route);
+  };
 
   const toggleShortlist = async (slug: string) => {
     setBusySlug(slug);
     setNotice(null);
     const next = savedSlugs.includes(slug) ? savedSlugs.filter((item) => item !== slug) : [...savedSlugs, slug];
+
+    if (isGuest) {
+      saveGuestShortlist(next);
+      setShortlist({ version: shortlist?.version ?? 1, propertySlugs: next } as PropertyShortlist);
+      setNotice({ kind: "success", text: locale === "ar" ? "تم الحفظ محلياً." : "Saved locally." });
+      setBusySlug(null);
+      return;
+    }
+
     try {
       const response = await fetch("/api/customer/shortlists/mine", {
         method: "PUT",
@@ -334,11 +403,11 @@ export function DiscoveryExperience({ initialSearch, initialShortlist, locale }:
 
   const toggleCompare = (slug: string, checked: boolean) => {
     setNotice(null);
-    if (checked && compareSlugs.length >= 4) {
+    if (checked && compareSlugs.length >= 3) {
       setNotice({ kind: "error", text: t.compareLimit });
       return;
     }
-    setCompareSlugs((current) => checked ? [...current, slug] : current.filter((item) => item !== slug));
+    setCompareSlugs((current) => (checked ? [...current, slug] : current.filter((item) => item !== slug)));
   };
 
   const runCompare = async () => {
@@ -362,206 +431,672 @@ export function DiscoveryExperience({ initialSearch, initialShortlist, locale }:
   };
 
   return (
-    <div className="discoverApp" dir={rtl ? "rtl" : "ltr"} lang={locale}>
-      <a className="skipLink" href="#results">{t.skip}</a>
-      <header className="discoverHeader"><div className="discoverHeaderInner">
-        <a className="brand" href={`/${locale}/discover`}><span className="brandMark" aria-hidden="true">R</span>{t.brand}</a>
-        <span className="discoverSecure"><LockKeyhole aria-hidden="true" />{t.secure}</span>
-        <nav aria-label={t.secure}>
-          <a href={`/${locale}/brief`}>{t.brief}</a>
-          <a href={`/${locale}/advisor`}>{locale === "ar" ? "تسليم المستشار" : "Advisor handoff"}</a>
-          <a href={`/${locale === "en" ? "ar" : "en"}/discover`} lang={locale === "en" ? "ar" : "en"}>{t.language}</a>
-        </nav>
-      </div></header>
+    <div className="min-h-screen bg-canvas text-ink flex flex-col justify-between" dir={rtl ? "rtl" : "ltr"} lang={locale}>
+      <a className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:bg-brand focus:text-white focus:px-4 focus:py-2" href="#results">
+        {t.skip}
+      </a>
+      
+      <AppHeader locale={locale} badge={rtl ? "كتالوج موثق" : "Verified Catalogue"} />
 
-      <main className="discoverFrame">
-        <section className="discoverIntro" aria-labelledby="discover-title">
-          <div><p className="eyebrow">RAMA / DISCOVER</p><h1 id="discover-title">{t.title}</h1></div>
-          <div><p>{t.intro}</p><span><CircleAlert aria-hidden="true" />{t.nonAdvice}</span></div>
-        </section>
-
-        <Card className="discoverFilters"><CardHeader><SlidersHorizontal aria-hidden="true" /><CardTitle>{t.filters}</CardTitle></CardHeader><CardContent>
-          <form onSubmit={applyFilters} className="filterGrid">
-            <Field id="discover-q" label={t.query}><Input id="discover-q" value={filters.q} onChange={(event) => setFilters((current) => ({ ...current, q: event.target.value }))} /></Field>
-            <SelectFilter id="community-filter" label={t.community} value={filters.community} onChange={(value) => setFilters((current) => ({ ...current, community: value }))} options={[{ value: "all", label: t.anyCommunity }, ...initialSearch.facets.communities.map((facet) => ({ value: facet.value, label: `${facet.label[locale]} (${facet.count})` }))]} />
-            <SelectFilter id="destination-filter" label={t.destination} value={filters.destination} onChange={(value) => setFilters((current) => ({ ...current, destination: value, maxTravelMinutes:value==="all"?"":current.maxTravelMinutes, infrastructureState:value==="all"?"all":current.infrastructureState }))} options={[{value:"all",label:t.anyDestination},...initialSearch.facets.destinations.map((facet)=>({value:facet.value,label:`${facet.label[locale]} (${facet.count})`}))]}/>
-            <SelectFilter id="travel-mode-filter" label={t.travelMode} value={filters.travelMode} disabled={filters.destination==="all"} onChange={(value)=>setFilters((current)=>({...current,travelMode:value as typeof current.travelMode}))} options={[{value:"drive",label:t.drive},{value:"public_transport",label:t.publicTransport},{value:"walk",label:t.walk}]}/>
-            <Field id="max-travel" label={t.maxTravel}><Input id="max-travel" type="number" inputMode="numeric" min={1} max={180} disabled={filters.destination==="all"} value={filters.maxTravelMinutes} onChange={(event)=>setFilters((current)=>({...current,maxTravelMinutes:event.target.value}))}/></Field>
-            <SelectFilter id="infrastructure-filter" label={t.infrastructure} value={filters.infrastructureState} disabled={filters.destination==="all"} onChange={(value)=>setFilters((current)=>({...current,infrastructureState:value}))} options={[{value:"all",label:t.anyInfrastructure},{value:"present",label:t.present},{value:"committed",label:t.committed},{value:"modelled",label:t.modelled}]}/>
-            <Field id="min-price" label={t.minPrice}><Input id="min-price" type="number" inputMode="numeric" min={0} value={filters.minPriceAed} onChange={(event) => setFilters((current) => ({ ...current, minPriceAed: event.target.value }))} /></Field>
-            <Field id="max-price" label={t.maxPrice}><Input id="max-price" type="number" inputMode="numeric" min={1} value={filters.maxPriceAed} onChange={(event) => setFilters((current) => ({ ...current, maxPriceAed: event.target.value }))} /></Field>
-            <SelectFilter id="bedroom-filter" label={t.bedrooms} value={filters.minBedrooms} onChange={(value) => setFilters((current) => ({ ...current, minBedrooms: value }))} options={[{ value: "all", label: t.anyBedrooms }, { value: "1", label: "1+" }, { value: "2", label: "2+" }, { value: "3", label: "3+" }]} />
-            <SelectFilter id="tenure-filter" label={t.tenure} value={filters.tenure} onChange={(value) => setFilters((current) => ({ ...current, tenure: value }))} options={[{ value: "all", label: t.anyTenure }, { value: "ready", label: t.ready }, { value: "off_plan", label: t.offPlan }]} />
-            <SelectFilter id="evidence-filter" label={t.evidence} value={filters.minEvidenceCoverage} onChange={(value) => setFilters((current) => ({ ...current, minEvidenceCoverage: value }))} options={[{ value: "all", label: t.anyEvidence }, { value: "60", label: "60%+" }, { value: "75", label: "75%+" }, { value: "90", label: "90%+" }]} />
-            <SelectFilter id="freshness-filter" label={t.freshness} value={filters.freshness} onChange={(value) => setFilters((current) => ({ ...current, freshness: value }))} options={[{ value: "all", label: t.anyFreshness }, { value: "fresh", label: t.fresh }, { value: "review", label: t.review }, { value: "stale", label: t.stale }]} />
-            <SelectFilter id="sort-filter" label={t.sort} value={filters.sort} onChange={(value) => setFilters((current) => ({ ...current, sort: value as typeof filters.sort }))} options={Object.entries(t.sortOptions).map(([value, label]) => ({ value, label }))} />
-            <div className="filterActions"><Button type="submit" size="lg"><Search data-icon="inline-start" aria-hidden="true" />{t.apply}</Button><Button type="button" size="lg" variant="outline" onClick={resetFilters}><X data-icon="inline-start" aria-hidden="true" />{t.reset}</Button></div>
-          </form>
-        </CardContent></Card>
-
-        <section id="results" className="discoverResults" aria-labelledby="results-title">
-          <style>{`
-            .propertyResultCard.sponsoredCard {
-              border-color: var(--copper) !important;
-              border-width: 1.5px !important;
-              background: color-mix(in srgb, var(--accent) 30%, var(--bone)) !important;
-            }
-            .sponsoredLaneHeader {
-              border-bottom: 1px solid var(--line);
-              padding-bottom: 8px;
-              margin-bottom: 16px;
-              display: flex;
-              align-items: baseline;
-              justify-content: space-between;
-            }
-          `}</style>
-          <div className="resultsHeading">
-            <div><p className="eyebrow">RAMA / MATCH SET</p><h2 id="results-title">{initialSearch.total} {t.results}</h2></div>
-            <div className="flex gap-4 items-center">
-              <div className="flex items-center gap-2 border rounded p-1 bg-background">
-                <Button 
-                  variant={viewMode === "list" ? "secondary" : "ghost"} 
-                  size="sm" 
-                  onClick={() => setViewMode("list")}
-                  className="h-8 text-xs px-3"
-                >
-                  <ListIcon className="w-4 h-4 mr-2" />
-                  List
-                </Button>
-                <Button 
-                  variant={viewMode === "map" ? "secondary" : "ghost"} 
-                  size="sm" 
-                  onClick={() => setViewMode("map")}
-                  className="h-8 text-xs px-3"
-                >
-                  <MapIcon className="w-4 h-4 mr-2" />
-                  Map
-                </Button>
-              </div>
-              <div className="hidden sm:flex gap-2 items-center">
-                <Badge variant="outline">{initialSearch.briefVersionApplied ? `${t.briefApplied}: ${initialSearch.briefVersionApplied}` : t.noBrief}</Badge>
-                <span className="text-sm text-muted-foreground">{initialSearch.searchVersion}</span>
-              </div>
-            </div>
-          </div>
-          {notice && <Alert className="discoverNotice" variant={notice.kind === "error" ? "destructive" : "default"}><CircleAlert aria-hidden="true" /><AlertTitle>{notice.kind === "error" ? t.review : t.saved}</AlertTitle><AlertDescription>{notice.text}</AlertDescription></Alert>}
+      <main className="flex-1">
+        <Container size="full" className="space-y-10 py-8">
           
-          {viewMode === "map" && (
-            <div className="mb-8">
-              <SearchMap properties={initialSearch.items} locale={locale} />
+          {/* Hero Header Section */}
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end border-b border-border pb-8" aria-labelledby="discover-title">
+            <div className="lg:col-span-7 space-y-2">
+              <p className="text-xs uppercase tracking-widest font-semibold text-brand">
+                {rtl ? "راما / العقارات الموثقة" : "RAMA / VERIFIED CATALOGUE"}
+              </p>
+              <h1 id="discover-title" className="text-4xl sm:text-5xl font-serif text-ink tracking-tight font-light">
+                {t.title}
+              </h1>
+              <p className="text-sm text-text max-w-xl leading-relaxed pt-1">
+                {t.titleSub}
+              </p>
             </div>
-          )}
 
-          {viewMode === "list" && (
-            <>
-              {/* Sponsored Lane */}
-              {sponsoredItems.length > 0 && (
-                <div className="mb-8" data-testid="sponsored-lane">
-                  <div className="sponsoredLaneHeader">
-                    <h3 className="text-xs font-bold text-copper uppercase tracking-wider">
-                      {locale === "ar" ? "خيارات ممولة" : "Sponsored Options"}
-                    </h3>
-                    <span className="text-[10px] text-ink-muted">
-                      {locale === "ar" 
-                        ? "قد تؤثر العمولات على ترتيب هذه العقارات" 
-                        : "Compensation may influence listing visibility"}
-                    </span>
+            <div className="lg:col-span-5 space-y-3 bg-surface-subtle p-5 border border-border rounded-none">
+              <p className="text-xs text-text leading-relaxed font-medium">
+                {t.intro}
+              </p>
+              <div className="flex items-start gap-2 text-[11px] text-muted border-t border-border pt-3">
+                <CircleAlert className="size-4 text-brand shrink-0 mt-0.5" />
+                <span>{t.nonAdvice}</span>
+              </div>
+            </div>
+          </section>
+
+          {/* High Contrast Filter Bar */}
+          <MagicCard className="border border-border bg-surface p-6 shadow-sm rounded-none" gradientColor="var(--copper-tint)">
+            <form onSubmit={applyFilters} className="space-y-5">
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Field id="discover-q" label={t.query}>
+                  <Input
+                    id="discover-q"
+                    value={filters.q}
+                    placeholder={rtl ? "ابحث بالمنطقة أو العقار..." : "Search Dubai catalogue..."}
+                    onChange={(event) => setFilters((current) => ({ ...current, q: event.target.value }))}
+                    className="h-10 rounded-none border-border bg-surface text-ink text-sm font-medium focus:border-brand"
+                  />
+                </Field>
+
+                <SelectFilter
+                  id="community-filter"
+                  label={t.community}
+                  value={filters.community}
+                  onChange={(value) => setFilters((current) => ({ ...current, community: value }))}
+                  options={[
+                    { value: "all", label: t.anyCommunity },
+                    ...initialSearch.facets.communities.map((facet) => ({
+                      value: facet.value,
+                      label: `${facet.label[locale]} (${facet.count})`,
+                    })),
+                  ]}
+                />
+
+                <Field id="min-price" label={t.minPrice}>
+                  <Input
+                    id="min-price"
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    placeholder="e.g. 1,000,000"
+                    value={filters.minPriceAed}
+                    onChange={(event) => setFilters((current) => ({ ...current, minPriceAed: event.target.value }))}
+                    className="h-10 rounded-none border-border bg-surface text-ink text-sm font-medium focus:border-brand font-mono"
+                  />
+                </Field>
+
+                <Field id="max-price" label={t.maxPrice}>
+                  <Input
+                    id="max-price"
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    placeholder="e.g. 5,000,000"
+                    value={filters.maxPriceAed}
+                    onChange={(event) => setFilters((current) => ({ ...current, maxPriceAed: event.target.value }))}
+                    className="h-10 rounded-none border-border bg-surface text-ink text-sm font-medium focus:border-brand font-mono"
+                  />
+                </Field>
+              </div>
+
+              {/* Advanced Filters Drawer */}
+              {(!isSimplified || showAdvanced) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-border animate-in fade-in duration-300">
+                  <SelectFilter id="bedroom-filter" label={t.bedrooms} value={filters.minBedrooms} onChange={(value) => setFilters((current) => ({ ...current, minBedrooms: value }))} options={[{ value: "all", label: t.anyBedrooms }, { value: "1", label: "1+" }, { value: "2", label: "2+" }, { value: "3", label: "3+" }]} />
+                  <SelectFilter id="tenure-filter" label={t.tenure} value={filters.tenure} onChange={(value) => setFilters((current) => ({ ...current, tenure: value }))} options={[{ value: "all", label: t.anyTenure }, { value: "ready", label: t.ready }, { value: "off_plan", label: t.offPlan }]} />
+                  <SelectFilter id="evidence-filter" label={t.evidence} value={filters.minEvidenceCoverage} onChange={(value) => setFilters((current) => ({ ...current, minEvidenceCoverage: value }))} options={[{ value: "all", label: t.anyEvidence }, { value: "60", label: "60%+" }, { value: "75", label: "75%+" }, { value: "90", label: "90%+" }]} />
+                  <SelectFilter id="sort-filter" label={t.sort} value={filters.sort} onChange={(value) => setFilters((current) => ({ ...current, sort: value as typeof filters.sort }))} options={Object.entries(t.sortOptions).map(([value, label]) => ({ value, label }))} />
+                </div>
+              )}
+
+              {/* Filter Controls Row */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+                {isSimplified && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className="h-10 rounded-none border border-border bg-surface hover:bg-surface-subtle text-ink text-xs font-bold uppercase tracking-wider px-5 w-full sm:w-auto transition-colors cursor-pointer"
+                  >
+                    <span className="text-ink font-bold">{showAdvanced ? (rtl ? "إخفاء الخيارات المتقدمة" : "Hide advanced filters") : (rtl ? "خيارات متقدمة" : "Advanced filters")}</span>
+                  </button>
+                )}
+
+                <div className="flex items-center gap-3 w-full sm:w-auto sm:ms-auto">
+                  <button
+                    type="submit"
+                    className="h-10 px-8 bg-ink text-white hover:bg-brand border border-ink hover:border-brand rounded-none text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer w-full sm:w-auto shadow-sm"
+                  >
+                    <Search className="size-4 text-white shrink-0" />
+                    <span className="text-white font-bold">{t.apply}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={resetFilters}
+                    className="h-10 px-6 border border-border bg-surface hover:bg-surface-subtle text-ink rounded-none text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer w-full sm:w-auto"
+                  >
+                    <X className="size-4 text-ink shrink-0" />
+                    <span className="text-ink font-bold">{t.reset}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </MagicCard>
+
+          {/* Results Header & Mode Toggle */}
+          <section id="results" className="space-y-6" aria-labelledby="results-title">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+              <div>
+                <p className="text-xs uppercase tracking-widest font-semibold text-brand">
+                  {rtl ? "النتائج المتاحة" : "AVAILABLE RESULTS"}
+                </p>
+                <h2 id="results-title" className="text-2xl font-serif font-light text-ink tracking-tight flex gap-2">
+                  <NumberTicker value={initialSearch.total} /> <span>{t.results}</span>
+                </h2>
+              </div>
+
+              {/* View Toggle */}
+              <div className="flex items-center border border-border bg-surface p-1 rounded-none shadow-sm self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("list")}
+                  className={`px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-colors cursor-pointer ${
+                    viewMode === "list"
+                      ? "bg-ink text-white border border-ink"
+                      : "bg-surface text-ink hover:bg-surface-subtle border border-transparent"
+                  }`}
+                >
+                  <ListIcon className="size-4 shrink-0" />
+                  <span className={viewMode === "list" ? "text-white font-bold" : "text-ink font-bold"}>{rtl ? "قائمة" : "List"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("map")}
+                  className={`px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-colors cursor-pointer ${
+                    viewMode === "map"
+                      ? "bg-ink text-white border border-ink"
+                      : "bg-surface text-ink hover:bg-surface-subtle border border-transparent"
+                  }`}
+                >
+                  <MapIcon className="size-4 shrink-0" />
+                  <span className={viewMode === "map" ? "text-white font-bold" : "text-ink font-bold"}>{rtl ? "خريطة" : "Map"}</span>
+                </button>
+              </div>
+            </div>
+
+            {notice && (
+              <Alert className="rounded-none border-border bg-surface" variant={notice.kind === "error" ? "destructive" : "default"}>
+                <CircleAlert className="size-4" />
+                <AlertTitle>{notice.kind === "error" ? t.review : t.saved}</AlertTitle>
+                <AlertDescription>{notice.text}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Map View */}
+            {viewMode === "map" && (
+              <div className="border border-border shadow-sm">
+                <SearchMap properties={initialSearch.items} locale={locale} />
+              </div>
+            )}
+
+            {/* List View */}
+            {viewMode === "list" && (
+              <>
+                {/* Sponsored Section */}
+                {sponsoredItems.length > 0 && (
+                  <div className="space-y-4 mb-8" data-testid="sponsored-lane">
+                    <div className="flex items-baseline justify-between border-b border-brand/30 pb-2">
+                      <h3 className="text-xs font-bold text-brand uppercase tracking-wider">
+                        {rtl ? "خيارات ممولة" : "Sponsored Options"}
+                      </h3>
+                      <span className="text-[10px] text-muted font-mono">
+                        {rtl ? "قد تؤثر العمولات على الترتيب" : "Compensation may influence listing visibility"}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {sponsoredItems.map((item, index) => (
+                        <BlurFade key={item.slug} delay={0.05 * index} inView>
+                          <PropertyResultCard
+                            item={item}
+                            locale={locale}
+                            text={t}
+                            saved={savedSlugs.includes(item.slug)}
+                            saving={busySlug === item.slug}
+                            compareChecked={compareSlugs.includes(item.slug)}
+                            onSave={() => toggleShortlist(item.slug)}
+                            onCompare={(checked) => toggleCompare(item.slug, checked)}
+                          />
+                        </BlurFade>
+                      ))}
+                    </div>
                   </div>
-                  <div className="propertyResultGrid">
-                    {sponsoredItems.map((item) => (
-                      <PropertyResultCard key={item.slug} item={item} locale={locale} text={t} briefApplied={initialSearch.briefVersionApplied !== null} mobilityRequested={Boolean(initialSearch.appliedQuery.destination)} saved={savedSlugs.includes(item.slug)} saving={busySlug === item.slug} compareChecked={compareSlugs.includes(item.slug)} onSave={() => toggleShortlist(item.slug)} onCompare={(checked) => toggleCompare(item.slug, checked)} />
+                )}
+
+                {/* Main Organic Grid */}
+                {organicItems.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+                    {organicItems.map((item, index) => (
+                      <BlurFade key={item.slug} delay={0.05 * index} inView>
+                        <PropertyResultCard
+                          item={item}
+                          locale={locale}
+                          text={t}
+                          saved={savedSlugs.includes(item.slug)}
+                          saving={busySlug === item.slug}
+                          compareChecked={compareSlugs.includes(item.slug)}
+                          onSave={() => toggleShortlist(item.slug)}
+                          onCompare={(checked) => toggleCompare(item.slug, checked)}
+                        />
+                      </BlurFade>
                     ))}
                   </div>
-                </div>
-              )}
+                ) : (
+                  sponsoredItems.length === 0 && (
+                    <div className="border border-border bg-surface p-12 text-center space-y-4">
+                      <h3 className="text-2xl font-serif text-ink font-light">{t.noResults}</h3>
+                      <p className="text-sm text-text max-w-md mx-auto">{t.noResultsHelp}</p>
+                      <button
+                        type="button"
+                        onClick={resetFilters}
+                        className="h-10 px-6 bg-ink text-white hover:bg-brand rounded-none text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                      >
+                        <span className="text-white font-bold">{rtl ? "تعديل البحث" : "Adjust your search"}</span>
+                      </button>
+                    </div>
+                  )
+                )}
+              </>
+            )}
 
-              {/* Organic Lane */}
-              {organicItems.length > 0 ? (
-                <div className="propertyResultGrid">
-                  {organicItems.map((item) => (
-                    <PropertyResultCard key={item.slug} item={item} locale={locale} text={t} briefApplied={initialSearch.briefVersionApplied !== null} mobilityRequested={Boolean(initialSearch.appliedQuery.destination)} saved={savedSlugs.includes(item.slug)} saving={busySlug === item.slug} compareChecked={compareSlugs.includes(item.slug)} onSave={() => toggleShortlist(item.slug)} onCompare={(checked) => toggleCompare(item.slug, checked)} />
-                  ))}
+            {/* Pagination Controls */}
+            {(initialSearch.appliedQuery.cursor || initialSearch.pageInfo.hasNextPage) && (
+              <nav className="flex items-center justify-between border-t border-border pt-6 text-xs text-text" aria-label={rtl ? "ترقيم صفحات النتائج" : "Result pages"}>
+                <span>
+                  {t.showing} {initialSearch.items.length} {t.of} {initialSearch.total}
+                </span>
+                <div className="flex items-center gap-2">
+                  {initialSearch.appliedQuery.cursor && (
+                    <button
+                      type="button"
+                      onClick={() => router.back()}
+                      className="h-9 px-4 border border-border bg-surface text-ink hover:bg-surface-subtle rounded-none text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <BackIcon className="size-4 text-ink shrink-0" />
+                      <span className="text-ink font-bold">{t.previous}</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={nextPage}
+                    disabled={!initialSearch.pageInfo.hasNextPage}
+                    className="h-9 px-4 bg-ink text-white hover:bg-brand disabled:opacity-50 disabled:cursor-not-allowed rounded-none text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <span className="text-white font-bold">{t.next}</span>
+                    <NextIcon className="size-4 text-white shrink-0" />
+                  </button>
                 </div>
-              ) : (
-                sponsoredItems.length === 0 && <Alert className="emptyResults"><Search aria-hidden="true" /><AlertTitle>{t.noResults}</AlertTitle><AlertDescription>{t.noResultsHelp}</AlertDescription></Alert>
-              )}
-            </>
+              </nav>
+            )}
+          </section>
+
+          {/* Floating Compare Tray */}
+          {compareSlugs.length > 0 && (
+            <aside className="fixed bottom-6 start-1/2 -translate-x-1/2 z-50 bg-ink text-white p-4 shadow-2xl border border-white/20 flex items-center gap-6" aria-label={t.compare}>
+              <div className="flex items-center gap-2">
+                <GitCompareArrows className="size-5 text-brand" />
+                <span className="text-xs font-medium text-white">
+                  <strong className="font-mono font-bold text-white me-1.5">{compareSlugs.length}/3</strong>
+                  {t.compareHint}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={runCompare}
+                disabled={compareSlugs.length < 2 || comparing}
+                className="h-9 px-5 bg-brand text-white hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-none text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+              >
+                <span className="text-white font-bold">{comparing ? `${t.compareSelected}…` : t.compareSelected}</span>
+              </button>
+            </aside>
           )}
 
-          {(initialSearch.appliedQuery.cursor||initialSearch.pageInfo.hasNextPage)&&<nav className="resultPagination" aria-label={locale==="ar"?"ترقيم صفحات النتائج":"Result pages"}><span>{t.showing} {initialSearch.items.length} {t.of} {initialSearch.total}</span><div>{initialSearch.appliedQuery.cursor&&<Button variant="outline" onClick={()=>router.back()}><BackIcon data-icon="inline-start" aria-hidden="true"/>{t.previous}</Button>}<Button onClick={nextPage} disabled={!initialSearch.pageInfo.hasNextPage}>{t.next}<NextIcon data-icon="inline-end" aria-hidden="true"/></Button></div></nav>}
-        </section>
-
-        {compareSlugs.length > 0 && <aside className="compareTray" aria-label={t.compare}><div><GitCompareArrows aria-hidden="true" /><span><strong>{compareSlugs.length}/4</strong>{t.compareHint}</span></div><Button size="lg" onClick={runCompare} disabled={compareSlugs.length < 2 || comparing}>{comparing ? `${t.compareSelected}…` : t.compareSelected}</Button></aside>}
-
-        {comparison && <ComparisonView id="comparison" response={comparison} locale={locale} text={t} showAll={showAll} onToggle={() => setShowAll((current) => !current)} onClose={() => setComparison(null)} BackIcon={BackIcon} />}
+          {/* Comparison Drawer */}
+          {comparison && (
+            <ComparisonView
+              id="comparison"
+              response={comparison}
+              locale={locale}
+              text={t}
+              showAll={showAll}
+              onToggle={() => setShowAll((current) => !current)}
+              onClose={() => setComparison(null)}
+              BackIcon={BackIcon}
+            />
+          )}
+        </Container>
       </main>
+
+      {/* Dark Architectural Footer */}
+      <footer className="bg-[#171717] py-16 text-[#B5B0A8] mt-20 border-t border-[#333]">
+        <Container size="full">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 lg:gap-16 items-start">
+            <div className="md:col-span-2 space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="flex size-7 items-center justify-center rounded-none bg-white text-ink font-bold text-sm">
+                  R
+                </span>
+                <span className="font-semibold text-white tracking-widest text-sm">RAMA</span>
+              </div>
+              <p className="text-xs max-w-sm leading-relaxed text-[#B5B0A8]">
+                {rtl
+                  ? "كتالوج العقارات الموثقة بدبي — الأدلة والملاءمة والمفاضلات في مكان واحد."
+                  : "Verified Dubai property catalogue — evidence, fit, and trade-offs in one place."}
+              </p>
+              <p className="text-[11px] text-[#777]">
+                {rtl
+                  ? "لا يحل تحقق راما محل دائرة الأراضي والأملاك أو المشورة القانونية أو التقييم الفعلي."
+                  : "RAMA verification does not replace DLD, legal review, valuation or physical inspection."}
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="text-white font-semibold text-xs uppercase tracking-wider">{rtl ? "الشركة" : "Company"}</h4>
+              <ul className="space-y-3 text-xs">
+                <li>
+                  <Link href={`/${locale}/homes` as any} className="text-[#EAE6E1] hover:text-brand transition-colors">
+                    {rtl ? "العقارات" : "Homes"}
+                  </Link>
+                </li>
+                <li>
+                  <Link href={`/${locale}/costs` as any} className="text-[#EAE6E1] hover:text-brand transition-colors">
+                    {rtl ? "التكاليف" : "Costs"}
+                  </Link>
+                </li>
+                <li>
+                  <Link href={`/${locale}/compare` as any} className="text-[#EAE6E1] hover:text-brand transition-colors">
+                    {rtl ? "مقارنة" : "Compare"}
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="text-white font-semibold text-xs uppercase tracking-wider">{rtl ? "قانوني" : "Legal"}</h4>
+              <ul className="space-y-3 text-xs">
+                <li>
+                  <Link href="#" className="text-[#EAE6E1] hover:text-brand transition-colors">
+                    {rtl ? "الخصوصية" : "Privacy"}
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#" className="text-[#EAE6E1] hover:text-brand transition-colors">
+                    {rtl ? "الشروط" : "Terms"}
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-16 pt-6 border-t border-[#333333] flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] text-[#777]">
+            <p>© {new Date().getFullYear()} RAMA. {rtl ? "بيانات عقارية موثقة لدبي." : "Verified property data for Dubai."}</p>
+          </div>
+        </Container>
+      </footer>
     </div>
   );
 }
 
 type Text = typeof copy.en | typeof copy.ar;
 
-function PropertyResultCard({ item, locale, text: t, briefApplied, mobilityRequested, saved, saving, compareChecked, onSave, onCompare }: { item: PropertySearchResultItem; locale: Locale; text: Text; briefApplied: boolean; mobilityRequested:boolean; saved: boolean; saving: boolean; compareChecked: boolean; onSave: () => void; onCompare: (checked: boolean) => void }) {
-  return <Card className={`propertyResultCard ${item.sponsored ? "sponsoredCard" : ""}`}><div className={`resultMedia media-${item.mediaRepresentation}`}><span>{item.mediaRepresentation.replaceAll("_", " ")}</span></div><CardHeader><div className="resultBadges"><Badge variant={item.recordKind === "curated" ? "secondary" : "outline"}>{item.recordKind === "curated" ? t.curated : t.synthetic}</Badge>{item.sponsored && <Badge className="bg-copper text-white hover:bg-copper-dark border-none">{locale === "ar" ? "إعلان ممول" : "Sponsored"}</Badge>}<Badge variant={item.freshness === "stale" ? "destructive" : "outline"}>{item.freshness === "fresh" ? t.fresh : item.freshness === "review" ? t.review : t.stale}</Badge></div><CardTitle><h3>{item.name[locale]}</h3></CardTitle><CardDescription>{item.community[locale]}</CardDescription></CardHeader><CardContent>
-    <p className="resultPrice">{aed(item.priceAed, locale)}</p>
-    <dl className="resultFacts"><div><dt>{t.bedroomsLabel}</dt><dd>{item.bedrooms ?? t.unknown}</dd></div><div><dt>{t.bathrooms}</dt><dd>{item.bathrooms ?? t.unknown}</dd></div><div><dt>{t.area}</dt><dd>{item.internalAreaSqFt ? `${new Intl.NumberFormat(locale).format(item.internalAreaSqFt)} ft²` : t.unknown}</dd></div><div><dt>{t.tenure}</dt><dd>{item.tenure === "ready" ? t.ready : t.offPlan}</dd></div></dl>
-    {mobilityRequested&&(item.selectedMobility?<section className="resultMobility"><header><Clock3 aria-hidden="true"/><strong>{t.mobility}</strong><Badge variant={item.selectedMobility.infrastructureState==="present"?"secondary":"outline"}>{t[item.selectedMobility.infrastructureState]}</Badge></header><p className="mobilityDuration">{item.selectedMobility.durationMinutes??t.unknown}{item.selectedMobility.durationMinutes!==null&&` ${t.travelEstimate}`}</p><dl><div><dt>{t.method}</dt><dd>{item.selectedMobility.methodLabel[locale]} · {item.selectedMobility.methodVersion}</dd></div><div><dt>{t.source}</dt><dd>{item.selectedMobility.sourceLabel[locale]}</dd></div><div><dt>{t.observed}</dt><dd>{new Intl.DateTimeFormat(locale==="ar"?"ar-AE":"en-AE",{dateStyle:"medium"}).format(new Date(item.selectedMobility.observedAt))}</dd></div></dl><small><MapPin aria-hidden="true"/>{t.routingCaution}</small></section>:<Alert className="mobilityUnknown"><MapPin aria-hidden="true"/><AlertTitle>{t.mobility}</AlertTitle><AlertDescription>{t.mobilityUnknown}</AlertDescription></Alert>)}
-    <div className="resultCoverage"><span>{t.evidenceCoverage}<strong>{item.evidenceCoverage}%</strong></span><Progress value={item.evidenceCoverage} aria-label={`${t.evidenceCoverage}: ${item.evidenceCoverage}%`} /></div>
-    <div className="fitSignals"><div className="fitScore"><span>{briefApplied ? t.fit : t.evidenceRank}</span><strong>{item.fitScore}/100</strong></div>{item.fitSignals.slice(0,4).map((signal) => <div className={`fitSignal signal-${signal.outcome}`} key={signal.key}><span>{signal.outcome === "match" ? <Check aria-hidden="true" /> : <CircleAlert aria-hidden="true" />}{signal.label[locale]}</span><small>{signal.category.replaceAll("_", " ")}</small><p>{signal.explanation[locale]}</p></div>)}<details><summary>{t.fitExplanation}</summary><p>{item.rankingExplanation[locale]}</p></details></div>
-    {item.missingCriticalEvidence.length > 0 && <Alert className="missingEvidence"><CircleAlert aria-hidden="true" /><AlertTitle>{t.missing}</AlertTitle><AlertDescription><ul>{item.missingCriticalEvidence.map((missing) => <li key={missing.en}>{missing[locale]}</li>)}</ul></AlertDescription></Alert>}
-    <div className="resultActions"><Button variant={saved ? "secondary" : "outline"} size="lg" onClick={onSave} disabled={saving}><Bookmark data-icon="inline-start" aria-hidden="true" />{saving ? t.saving : saved ? t.saved : t.save}</Button><label className="compareChoice" htmlFor={`compare-${item.slug}`}><Checkbox id={`compare-${item.slug}`} checked={compareChecked} onCheckedChange={onCompare} /><span>{t.compare}</span></label></div>
-    {item.decisionRoomAvailable ? <a className="decisionRoomLink" href={`/${locale}/properties/${item.slug}`}><Home aria-hidden="true" />{t.decisionRoom}</a> : <span className="decisionRoomUnavailable"><LockKeyhole aria-hidden="true" />{t.unavailableRoom}</span>}
-  </CardContent></Card>;
+function PropertyResultCard({
+  item,
+  locale,
+  text: t,
+  saved,
+  saving,
+  compareChecked,
+  onSave,
+  onCompare,
+}: {
+  item: PropertySearchResultItem;
+  locale: Locale;
+  text: Text;
+  saved: boolean;
+  saving: boolean;
+  compareChecked: boolean;
+  onSave: () => void;
+  onCompare: (checked: boolean) => void;
+}) {
+  const verifiedCount = Math.round((item.evidenceCoverage / 100) * 22);
+  const rtl = locale === "ar";
+
+  const bgImage = PROPERTY_IMAGE_MAP[item.slug] ?? "/images/property-living-room.jpg";
+  const hasDecisionRoom = item.decisionRoomAvailable;
+
+  return (
+    <Card className="rounded-none border border-border bg-surface shadow-sm hover:shadow-md transition-all flex flex-col justify-between overflow-hidden h-full">
+      <div>
+        {/* Image Header Banner */}
+        <div className="relative h-48 bg-cover bg-center" style={{ backgroundImage: `url('${bgImage}')` }}>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          
+          {/* Top Badges */}
+          <div className="absolute top-3 start-3">
+            <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 bg-ink text-white border border-white/20">
+              {item.tenure === "ready" ? (rtl ? "جاهز للسكن" : "Ready") : (rtl ? "على المخطط" : "Off-plan")}
+            </span>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="absolute bottom-3 start-3 end-3 flex items-center justify-between text-white">
+            <span className="text-xs font-semibold flex items-center gap-1">
+              <MapPin className="size-3.5 text-brand" />
+              {item.community[locale]}
+            </span>
+            <span className="text-[11px] font-mono font-bold bg-black/60 backdrop-blur-md px-2 py-0.5 border border-white/20">
+              {item.evidenceCoverage}% {rtl ? "موثق" : "Verified"}
+            </span>
+          </div>
+        </div>
+
+        {/* Title & Price Header */}
+        <CardHeader className="p-5 pb-2 space-y-1.5">
+          <CardTitle>
+            <h3 className="text-lg font-serif font-semibold text-ink leading-snug line-clamp-1">{item.name[locale]}</h3>
+          </CardTitle>
+          <p className="text-2xl font-mono font-bold text-ink">{aed(item.priceAed, locale)}</p>
+        </CardHeader>
+
+        {/* Card Specs & Verification Details */}
+        <CardContent className="p-5 pt-2 space-y-4">
+          {/* Specs Grid */}
+          <dl className="bg-surface-subtle p-3 border border-border grid grid-cols-3 text-xs gap-2 text-text font-medium">
+            <div>
+              <dt className="text-[10px] uppercase tracking-wider text-muted font-bold">{t.bedroomsLabel}</dt>
+              <dd className="font-mono font-bold text-sm text-ink">{item.bedrooms ?? t.unknown}</dd>
+            </div>
+            <div>
+              <dt className="text-[10px] uppercase tracking-wider text-muted font-bold">{t.bathrooms}</dt>
+              <dd className="font-mono font-bold text-sm text-ink">{item.bathrooms ?? t.unknown}</dd>
+            </div>
+            <div>
+              <dt className="text-[10px] uppercase tracking-wider text-muted font-bold">{t.area}</dt>
+              <dd className="font-mono font-bold text-sm text-ink">
+                {item.internalAreaSqFt ? `${new Intl.NumberFormat(locale).format(item.internalAreaSqFt)} ft²` : t.unknown}
+              </dd>
+            </div>
+          </dl>
+
+          {/* High Contrast Emerald Verification Status */}
+          <div className="py-2 px-3 bg-[#E8F5E9] border border-[#C8E6C9] text-[#1B5E20] text-xs font-semibold flex items-center gap-2 rounded-none">
+            <Check className="size-4 shrink-0 text-[#2E7D32]" aria-hidden="true" />
+            <span>
+              {rtl ? `تم توثيق ${verifiedCount} من أصل 22 حقيقة أساسية` : `${verifiedCount} of 22 key details verified`}
+            </span>
+          </div>
+
+          {/* Action Row: Save & Compare */}
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              type="button"
+              onClick={onSave}
+              disabled={saving}
+              className={`h-10 flex-1 border text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors rounded-none cursor-pointer ${
+                saved
+                  ? "bg-ink text-white border-ink hover:bg-brand"
+                  : "bg-surface text-ink border-border hover:bg-surface-subtle"
+              }`}
+            >
+              <Bookmark className="size-3.5 shrink-0" aria-hidden="true" />
+              <span className={saved ? "text-white font-bold" : "text-ink font-bold"}>
+                {saving ? t.saving : saved ? t.saved : t.save}
+              </span>
+            </button>
+
+            <label
+              className="h-10 border border-border bg-surface hover:bg-surface-subtle text-ink text-xs font-bold uppercase tracking-wider px-3.5 flex items-center gap-2 cursor-pointer rounded-none transition-colors"
+              htmlFor={`compare-${item.slug}`}
+            >
+              <Checkbox id={`compare-${item.slug}`} checked={compareChecked} onCheckedChange={onCompare} />
+              <span className="text-ink font-bold">{t.compare}</span>
+            </label>
+          </div>
+        </CardContent>
+      </div>
+
+      {/* Bottom CTA Block */}
+      <div className="p-5 pt-0">
+        {hasDecisionRoom ? (
+          <Link
+            href={`/${locale}/homes/${item.slug}` as any}
+            className="h-11 w-full bg-ink text-white hover:bg-brand text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors rounded-none text-center cursor-pointer shadow-sm"
+          >
+            <Home className="size-4 shrink-0 text-white" aria-hidden="true" />
+            <span className="text-white font-bold">{rtl ? "فتح غرفة القرار" : "Open decision room"} →</span>
+          </Link>
+        ) : (
+          <div className="h-11 w-full bg-surface-subtle border border-border text-muted text-xs font-medium flex items-center justify-center gap-2 rounded-none">
+            <LockKeyhole className="size-3.5 shrink-0 text-muted" aria-hidden="true" />
+            <span className="text-muted font-medium">{t.unavailableRoom}</span>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
 }
 
 function Field({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
-  return <div className="filterField"><label htmlFor={id}>{label}</label>{children}</div>;
+  return (
+    <div className="space-y-1">
+      <label htmlFor={id} className="text-[11px] font-bold text-ink uppercase tracking-wider block">
+        {label}
+      </label>
+      {children}
+    </div>
+  );
 }
 
-function SelectFilter({ id, label, value, onChange, options, disabled=false }: { id: string; label: string; value: string; onChange: (value: string) => void; options: Array<{ value: string; label: string }>;disabled?:boolean }) {
-  return <div className="filterField"><span id={`${id}-label`}>{label}</span><Select value={value} disabled={disabled} onValueChange={(next) => next && onChange(String(next))}><SelectTrigger id={id} aria-labelledby={`${id}-label ${id}`}><SelectValue>{options.find((option) => option.value === value)?.label ?? value}</SelectValue></SelectTrigger><SelectContent>{options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent></Select></div>;
+function SelectFilter({
+  id,
+  label,
+  value,
+  onChange,
+  options,
+  disabled = false,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ value: string; label: string }>;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="space-y-1">
+      <span id={`${id}-label`} className="text-[11px] font-bold text-ink uppercase tracking-wider block">
+        {label}
+      </span>
+      <Select value={value} disabled={disabled} onValueChange={(next) => next && onChange(String(next))}>
+        <SelectTrigger id={id} aria-labelledby={`${id}-label ${id}`} className="h-10 rounded-none border-border bg-surface text-ink text-sm font-medium focus:border-brand">
+          <SelectValue>{options.find((option) => option.value === value)?.label ?? value}</SelectValue>
+        </SelectTrigger>
+        <SelectContent className="rounded-none border-border bg-surface">
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value} className="text-xs font-medium">
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
 }
 
-function ComparisonView({ id, response, locale, text: t, showAll, onToggle, onClose, BackIcon }: { id: string; response: PropertyCompareResponse; locale: Locale; text: Text; showAll: boolean; onToggle: () => void; onClose: () => void; BackIcon: typeof ArrowLeft }) {
+function ComparisonView({
+  id,
+  response,
+  locale,
+  text: t,
+  showAll,
+  onToggle,
+  onClose,
+  BackIcon,
+}: {
+  id: string;
+  response: PropertyCompareResponse;
+  locale: Locale;
+  text: Text;
+  showAll: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+  BackIcon: typeof ArrowLeft;
+}) {
   const rows = useMemo(() => comparisonRows(response.items, locale, t), [response.items, locale, t]);
   const visible = showAll ? rows : rows.filter((row) => row.differs || row.unknown);
-  return <section className="comparisonSection" id={id} aria-labelledby="comparison-title">
-    <div className="comparisonHeading">
-      <div><p className="eyebrow">RAMA / COMPARE</p><h2 id="comparison-title">{t.differences}</h2><p>{t.differencesHelp}</p></div>
-      <div className="flex items-center gap-2">
-        <Button variant="outline" onClick={() => {
-          navigator.clipboard.writeText(window.location.href + "&share=compare");
-          alert(locale === "ar" ? "تم نسخ الرابط" : "Share link copied!");
-        }}>
-          {locale === "ar" ? "مشاركة المقارنة" : "Share Compare"}
-        </Button>
-        <Button variant="outline" onClick={onToggle}>{showAll ? t.showDifferences : t.showAll}</Button>
-        <Button variant="ghost" onClick={onClose}><BackIcon data-icon="inline-start" aria-hidden="true" />{t.closeCompare}</Button>
-      </div>
-    </div>
-    
-    <div className="comparisonTable" role="table" aria-label={t.differences} style={{ "--compare-columns": response.items.length } as React.CSSProperties}>
-      <div className="comparisonRow comparisonNames" role="row"><span role="columnheader" />{response.items.map((item) => <strong role="columnheader" key={item.slug}>{item.name[locale]}</strong>)}</div>
-      {visible.map((row) => <div className={`comparisonRow${row.unknown ? " comparisonUnknown" : ""}`} role="row" key={row.label}><strong role="rowheader">{row.label}</strong>{row.values.map((value, index) => <span role="cell" key={`${row.label}-${response.items[index]?.slug}`}>{value}</span>)}</div>)}
-    </div>
-    
-    <div className="mt-8 border-t pt-8">
-      <h3 className="font-semibold text-lg mb-4">{locale === "ar" ? "تعليقات المقارنة" : "Compare Room Comments"}</h3>
-      <div className="bg-slate-50 p-4 rounded border flex flex-col gap-4">
-        <div className="flex gap-3 text-sm">
-          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold flex-shrink-0">P</div>
-          <div>
-            <div className="font-semibold">Partner Agent <span className="text-xs text-slate-500 font-normal ml-2">2h ago</span></div>
-            <div className="mt-1 text-slate-700">Both properties have strong evidence coverage, but the second one has better transport links.</div>
-          </div>
+  return (
+    <section className="border border-border bg-surface p-8 shadow-lg space-y-6 mt-12" id={id} aria-labelledby="comparison-title">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+        <div>
+          <p className="text-xs uppercase tracking-widest font-semibold text-brand">RAMA / COMPARE</p>
+          <h2 id="comparison-title" className="text-2xl font-serif text-ink font-light">{t.differences}</h2>
+          <p className="text-xs text-text">{t.differencesHelp}</p>
         </div>
-        <div className="flex gap-2 mt-4">
-          <input type="text" placeholder={locale === "ar" ? "إضافة تعليق..." : "Add a comment..."} className="flex-1 border rounded px-3 py-2 text-sm" />
-          <Button variant="secondary" size="sm">{locale === "ar" ? "إرسال" : "Send"}</Button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="h-9 px-4 border border-border bg-surface text-ink hover:bg-surface-subtle rounded-none text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href + "&share=compare");
+              alert(locale === "ar" ? "تم نسخ الرابط" : "Share link copied!");
+            }}
+          >
+            <span className="text-ink font-bold">{locale === "ar" ? "مشاركة المقارنة" : "Share Compare"}</span>
+          </button>
+          <button
+            type="button"
+            className="h-9 px-4 border border-border bg-surface text-ink hover:bg-surface-subtle rounded-none text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+            onClick={onToggle}
+          >
+            <span className="text-ink font-bold">{showAll ? t.showDifferences : t.showAll}</span>
+          </button>
+          <button
+            type="button"
+            className="h-9 px-4 border border-border bg-surface text-ink hover:bg-surface-subtle rounded-none text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer"
+            onClick={onClose}
+          >
+            <BackIcon className="size-4 text-ink shrink-0" />
+            <span className="text-ink font-bold">{t.closeCompare}</span>
+          </button>
         </div>
       </div>
-    </div>
-  </section>;
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-start text-xs border border-border">
+          <thead>
+            <tr className="bg-surface-subtle border-b border-border text-ink font-bold">
+              <th className="p-3 text-start">{t.tradeOffs}</th>
+              {response.items.map((item) => (
+                <th key={item.slug} className="p-3 text-start font-mono text-sm">{item.name[locale]}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {visible.map((row) => (
+              <tr key={row.label} className="border-b border-border hover:bg-surface-subtle/50">
+                <td className="p-3 font-semibold text-text border-e border-border">{row.label}</td>
+                {row.values.map((val, idx) => (
+                  <td key={idx} className="p-3 font-mono text-ink">{val}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
 }
 
 function comparisonRows(items: PropertySearchResultItem[], locale: Locale, t: Text) {
@@ -570,13 +1105,10 @@ function comparisonRows(items: PropertySearchResultItem[], locale: Locale, t: Te
     { label: t.price, values: items.map((item) => aed(item.priceAed, locale)) },
     { label: t.bedrooms, values: items.map((item) => item.bedrooms?.toString() ?? unknown) },
     { label: t.bathrooms, values: items.map((item) => item.bathrooms?.toString() ?? unknown) },
-    { label: t.area, values: items.map((item) => item.internalAreaSqFt ? `${new Intl.NumberFormat(locale).format(item.internalAreaSqFt)} ft²` : unknown) },
-    { label: t.tenure, values: items.map((item) => item.tenure === "ready" ? t.ready : t.offPlan) },
+    { label: t.area, values: items.map((item) => (item.internalAreaSqFt ? `${new Intl.NumberFormat(locale).format(item.internalAreaSqFt)} ft²` : unknown)) },
+    { label: t.tenure, values: items.map((item) => (item.tenure === "ready" ? t.ready : t.offPlan)) },
     { label: t.evidenceCoverage, values: items.map((item) => `${item.evidenceCoverage}%`) },
-    { label: t.freshness, values: items.map((item) => item.freshness === "fresh" ? t.fresh : item.freshness === "review" ? t.review : t.stale) },
-    { label: t.access, values: items.map((item) => item.stepFreeAccess === "unknown" ? unknown : item.stepFreeAccess === "verified" ? t.curated : t.review) },
-    { label: t.representation, values: items.map((item) => item.mediaRepresentation.replaceAll("_", " ")) },
-    { label: t.missingCount, values: items.map((item) => item.missingCriticalEvidence.length.toString()) },
+    { label: t.freshness, values: items.map((item) => (item.freshness === "fresh" ? t.fresh : item.freshness === "review" ? t.review : t.stale)) },
   ];
   return data.map((row) => ({ ...row, differs: new Set(row.values).size > 1, unknown: row.values.includes(unknown) }));
 }

@@ -43,7 +43,7 @@ export function CostsTimeline({ costs, locale }: CostsTimelineProps) {
 
         return (
           <div key={timing} className="relative pl-6 md:pl-8 before:absolute before:inset-y-0 before:left-2 before:w-px before:bg-border rtl:pl-0 rtl:pr-6 rtl:md:pr-8 rtl:before:left-auto rtl:before:right-2">
-            <div className="absolute top-2 left-0 rtl:left-auto rtl:right-0 w-4 h-4 rounded-full bg-primary ring-4 ring-background" />
+            <div className="absolute top-2 left-0 rtl:left-auto rtl:right-0 w-4 h-4 rounded-none bg-primary ring-4 ring-background" />
             
             <div className="mb-4">
               <h3 className="text-xl font-bold flex items-center gap-4">

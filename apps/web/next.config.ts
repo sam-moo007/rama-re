@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   images: {
     formats: ["image/avif", "image/webp"],
+    qualities: [75, 90],
     remotePatterns: [
       {
         protocol: "https",
@@ -16,7 +17,7 @@ const nextConfig: NextConfig = {
     ],
     localPatterns: [
       {
-        pathname: "/images/**",
+        pathname: "/**",
       },
     ],
   },
@@ -42,6 +43,30 @@ const nextConfig: NextConfig = {
             value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; connect-src 'self' https://iewfpyoxhxkmbwwcmavz.supabase.co https://*.supabase.co https://api.mapbox.com https://events.mapbox.com; img-src 'self' blob: data: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; frame-ancestors 'none';",
           }
         ],
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        source: '/discover',
+        destination: '/homes',
+        permanent: true,
+      },
+      {
+        source: '/cost-engine',
+        destination: '/costs',
+        permanent: true,
+      },
+      {
+        source: '/decision-room/:slug',
+        destination: '/homes/:slug',
+        permanent: true,
+      },
+      {
+        source: '/brief',
+        destination: '/plan',
+        permanent: true,
       },
     ];
   },

@@ -1,0 +1,122 @@
+/* ═══════════════════════════════════════════════════════════════
+   RAMA 2.0 NORDIC DESIGN SYSTEM TOKENS
+   Based on suggestions.md specification
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Foundation Palette */
+  --color-canvas: #FAF8F5;
+  --color-surface: #FFFFFF;
+  --color-surface-subtle: #F5F2ED;
+  --color-surface-dark: #171717;
+  --color-ink: #1A1A1A;
+  --color-text: #3D3D3D;
+  --color-text-dark: #B5B0A8;
+  --color-muted: #8A8279;
+  --color-border: #E8E2D9;
+
+  /* Brand Palette */
+  --color-brand: #C4896B;
+  --color-brand-hover: #B37A5D;
+  --color-brand-soft: #F0EBE3;
+
+  /* Semantic Palette */
+  --color-positive: #7A9B7E;
+  --color-positive-soft: #EEF2F0;
+  --color-caution: #8A7036;
+  --color-caution-soft: #F7F4EC;
+  --color-critical: #8F3A2F;
+  --color-critical-soft: #F9EBDF;
+  --color-unknown: #8A8279;
+  --color-unknown-soft: #F5F2ED;
+
+  /* Legacy Compatibility Aliases */
+  --limestone: var(--color-canvas);
+  --bone: var(--color-surface);
+  --ink: var(--color-ink);
+  --ink-soft: var(--color-text);
+  --ink-muted: var(--color-muted);
+  --sage: var(--color-positive);
+  --sage-tint: var(--color-positive-soft);
+  --copper: var(--color-brand);
+  --copper-dark: var(--color-brand-hover);
+  --copper-tint: var(--color-brand-soft);
+  --ochre: var(--color-caution);
+  --ochre-tint: var(--color-caution-soft);
+  --risk: var(--color-critical);
+  --risk-tint: var(--color-critical-soft);
+  --unknown: var(--color-unknown);
+  --unknown-tint: var(--color-unknown-soft);
+  --line: var(--color-border);
+  --line-strong: #c2c7c0;
+  --max: 1280px;
+
+  /* shadcn Component Variable Mapping */
+  --background: var(--color-canvas);
+  --foreground: var(--color-ink);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-text);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-brand);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-surface-subtle);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-surface-subtle);
+  --muted-foreground: var(--color-muted);
+  --accent: var(--color-brand-soft);
+  --accent-foreground: var(--color-brand);
+  --destructive: var(--color-critical);
+  --destructive-foreground: #ffffff;
+  --border: var(--color-border);
+  --input: var(--color-border);
+  --ring: var(--color-brand);
+
+  /* Typography Scale */
+  --font-size-caption: 0.75rem;   /* 12px */
+  --font-size-small: 0.875rem;    /* 14px */
+  --font-size-body: 1rem;         /* 16px */
+  --font-size-body-lg: 1.125rem;  /* 18px */
+  --font-size-h4: 1.125rem;      /* 18px */
+  --font-size-h3: 1.25rem;       /* 20px */
+  --font-size-h2: 1.75rem;       /* 28px */
+  --font-size-h1: 2.25rem;       /* 36px */
+  --font-size-display: clamp(1.875rem, 3.5vw, 2.75rem);
+
+  /* Control Sizing Scale (Nordic spacious touch targets) */
+  --control-sm: 44px;
+  --control-md: 48px;
+  --control-lg: 56px;
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius: var(--radius-md);
+
+  /* Spacing Grid */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  /* Elevation (Subtle borders & restrained shadows) */
+  --shadow-none: none;
+  --shadow-subtle: 0 4px 16px rgb(60 50 40 / 4%);
+  --shadow-floating: 0 8px 32px rgb(60 50 40 / 6%);
+  --shadow-sm: var(--shadow-subtle);
+  --shadow-md: var(--shadow-floating);
+  --shadow-lg: 0 16px 48px rgb(60 50 40 / 8%);
+
+  /* Motion Timing */
+  --duration-fast: 120ms;
+  --duration-standard: 180ms;
+  --duration-slow: 240ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}

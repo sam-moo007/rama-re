@@ -120,6 +120,23 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  // ----------------------------------------------------------------------
+  // A/B Testing Logic: Nordic Companion Pivot
+  // ----------------------------------------------------------------------
+  let bucket = request.cookies.get('rama_ab_bucket')?.value;
+  if (!bucket) {
+    // STARTING SPLIT: 10% Nordic, 90% Legacy
+    // EARLY STOPPING RULE: If Nordic variant shows a bounce rate spike >15% in Week 1, 
+    // this fraction should be reverted to 0 immediately.
+    bucket = Math.random() < 0.1 ? 'nordic' : 'legacy';
+  }
+
+  supabaseResponse.cookies.set('rama_ab_bucket', bucket, { 
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+  });
+  supabaseResponse.headers.set('x-rama-ab-bucket', bucket);
+
   return supabaseResponse;
 }
 

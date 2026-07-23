@@ -1,0 +1,130 @@
+/* ═══════════════════════════════════════════════════════════════
+   PROPERTY DECISION ROOM STYLES (Nordic Viewport Scale)
+   ══════════════════════════════════════════════════════════════ */
+
+.propertyHero {
+  border-block: 1px solid var(--border);
+  display: grid;
+  gap: 0;
+  grid-template-columns: 1fr;
+  min-block-size: auto;
+}
+
+@media (width >= 1024px) {
+  .propertyHero {
+    grid-template-columns: 1.2fr 1fr;
+  }
+}
+
+.propertyMedia {
+  border-inline-end: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  padding: 16px;
+}
+
+.heroSummary {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+.heroSummary h1 {
+  font-size: clamp(1.4rem, 2.2vw, 2rem);
+  line-height: 1.15;
+  margin-block-end: 12px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+.propertyPrice {
+  color: var(--color-ink);
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin-block-end: 16px;
+}
+
+.decisionLayout {
+  align-items: start;
+  display: grid;
+  gap: 64px;
+  grid-template-columns: 1fr;
+  padding-block: 32px 64px;
+}
+
+@media (width >= 1024px) {
+  .decisionLayout {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+}
+
+.decisionContent {
+  max-inline-size: 860px;
+}
+
+.sectionRail {
+  inset-block-start: 80px;
+  position: sticky;
+}
+.sectionRail nav {
+  border-block-start: 1px solid var(--border);
+  display: grid;
+}
+.sectionRail nav a {
+  align-items: baseline;
+  border-block-end: 1px solid var(--border);
+  color: var(--ink-soft);
+  display: grid;
+  font-size: 0.8rem;
+  font-weight: 500;
+  gap: 8px;
+  grid-template-columns: 20px 1fr;
+  padding-block: 10px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.sectionRail nav a:hover { color: var(--primary); padding-inline-start: 4px; }
+
+.contentSection {
+  border-block-start: 1px solid var(--border);
+  padding-block: 32px 48px;
+  scroll-margin-block-start: 80px;
+}
+.contentSection:first-child { border-block-start: 0; padding-block-start: 0; }
+
+.passportFrame {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 8px);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.passportHeader {
+  align-items: flex-end;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-ink);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+}
+
+@media (width >= 640px) {
+  .passportHeader {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+.passportHeader h2 {
+  font-size: clamp(1.2rem, 2vw, 1.75rem);
+  font-weight: 400;
+  line-height: 1.2;
+  margin-block-end: 6px;
+}
+
+@media (width <= 1023px) {
+  .sectionRail { position: relative; inset-block-start: 0; margin-bottom: 24px; }
+}

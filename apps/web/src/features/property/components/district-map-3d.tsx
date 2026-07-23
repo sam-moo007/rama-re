@@ -55,7 +55,7 @@ export function DistrictMap3D({ locale }: DistrictMap3DProps) {
             <span className="bg-black/50 px-2 py-1 rounded border border-white/10">LAT: 25.0768° N</span>
             <span className="bg-black/50 px-2 py-1 rounded border border-white/10">LON: 55.1328° E</span>
             <span className="bg-black/50 px-2 py-1 rounded border border-white/10 ml-auto flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+              <span className="w-1.5 h-1.5 rounded-none bg-green-500"></span>
               CESIUM_READY
             </span>
           </div>

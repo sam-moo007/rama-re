@@ -3,6 +3,7 @@
 }
 .login-page::before {
   content: "";
+
   @apply absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/20 -z-10;
 }
 .login-form-container {
@@ -69,6 +70,7 @@
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
 @keyframes slideDownFade {
   from { opacity: 0; transform: translate(-50%, -20px); }
   to { opacity: 1; transform: translate(-50%, 0); }
