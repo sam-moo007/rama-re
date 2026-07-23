@@ -24,7 +24,7 @@ export function DecisionPillarsShowcase({ locale }: DecisionPillarsShowcaseProps
         : "Clear plain-language summaries with 18 of 22 facts confirmed from official Dubai Land Department records.",
       color: "var(--surface)", // elegant light neutral
       content: (
-        <div className="p-6 lg:p-8 space-y-6 w-full h-full flex flex-col justify-center">
+        <div className="p-6 lg:p-8 space-y-6 w-full h-full flex flex-col justify-center overflow-y-auto">
           <div className="flex items-center justify-between border-b border-border/50 pb-4">
             <div className="flex items-center gap-3">
               <span className="flex size-7 items-center justify-center bg-ink text-white text-xs font-bold">DLD</span>
@@ -87,7 +87,7 @@ export function DecisionPillarsShowcase({ locale }: DecisionPillarsShowcaseProps
         : "Staged breakdown: at reservation, at DLD transfer, and during ongoing ownership with zero hidden fees.",
       color: "var(--bone)", // warm neutral
       content: (
-        <div className="p-6 lg:p-8 space-y-6 w-full h-full flex flex-col justify-center">
+        <div className="p-6 lg:p-8 space-y-6 w-full h-full flex flex-col justify-center overflow-y-auto">
           <div className="flex items-center justify-between border-b border-border/50 pb-4">
             <div>
               <h4 className="text-sm font-semibold text-ink">
@@ -136,7 +136,7 @@ export function DecisionPillarsShowcase({ locale }: DecisionPillarsShowcaseProps
         : "Precise evaluation of peak commute times, nearby schools, and spatial layout match.",
       color: "var(--sage-tint)", // muted green tint
       content: (
-        <div className="p-6 lg:p-8 space-y-6 w-full h-full flex flex-col justify-center">
+        <div className="p-6 lg:p-8 space-y-6 w-full h-full flex flex-col justify-center overflow-y-auto">
           <div className="flex items-center justify-between border-b border-border/40 pb-4">
             <div>
               <h4 className="text-sm font-semibold text-ink">

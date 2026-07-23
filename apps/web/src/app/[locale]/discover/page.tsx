@@ -7,6 +7,13 @@ type Props = {
 
 export default async function DiscoverPage({ params, searchParams }: Props) {
   const { locale } = await params;
-  const search = new URLSearchParams(await searchParams as any).toString();
+  const params_ = new URLSearchParams();
+  const sp = await searchParams as Record<string, string | string[] | undefined>;
+  for (const [key, value] of Object.entries(sp)) {
+    if (value === undefined) continue;
+    const values = Array.isArray(value) ? value : [value];
+    for (const v of values) params_.append(key, v);
+  }
+  const search = params_.toString();
   redirect(`/${locale}/homes${search ? `?${search}` : ""}` as any);
 }

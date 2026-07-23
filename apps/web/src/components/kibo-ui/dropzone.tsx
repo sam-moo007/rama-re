@@ -39,7 +39,15 @@ export const Dropzone = React.forwardRef<HTMLDivElement, DropzoneProps>(
       e.preventDefault();
       setIsDragOver(false);
       if (e.dataTransfer.files && onFileDrop) {
-        onFileDrop(e.dataTransfer.files);
+        const maxSize = 20 * 1024 * 1024;
+        const filtered = Array.from(e.dataTransfer.files).filter(
+          (file) => file.size <= maxSize
+        );
+        if (filtered.length > 0) {
+          const dt = new DataTransfer();
+          filtered.forEach((file) => dt.items.add(file));
+          onFileDrop(dt.files);
+        }
       }
     };
 
