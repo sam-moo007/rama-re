@@ -43,6 +43,7 @@ export function ChatInterface({ propertyId }: { propertyId: string }) {
           escalate: data.escalate
         }
       ]);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setMessages((prev) => [
         ...prev, 

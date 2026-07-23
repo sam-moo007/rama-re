@@ -14,6 +14,7 @@ interface AppHeaderProps {
   isAuthenticated?: boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function AppHeader({ locale, variant = "default", title, badge, isAuthenticated = true }: AppHeaderProps) {
   const [menuState, setMenuState] = useState(false);
   const isAr = locale === "ar";

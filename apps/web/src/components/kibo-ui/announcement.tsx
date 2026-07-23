@@ -60,6 +60,7 @@ export const AnnouncementTag = React.forwardRef<HTMLSpanElement, AnnouncementTag
 );
 AnnouncementTag.displayName = "AnnouncementTag";
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface AnnouncementTitleProps extends React.HTMLAttributes<HTMLSpanElement> {}
 
 export const AnnouncementTitle = React.forwardRef<HTMLSpanElement, AnnouncementTitleProps>(

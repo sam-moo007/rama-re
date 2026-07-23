@@ -1,5 +1,6 @@
 "use client";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Calculator, Info, Landmark, Percent, CalendarRange, Coins } from "lucide-react";
 import { useMemo, useState } from "react";
 

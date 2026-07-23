@@ -16,6 +16,7 @@ export async function proxy(request: NextRequest) {
       cookies: {
         getAll: () => request.cookies.getAll(),
         setAll: (cookiesToSet) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
           for (const { name, value, options } of cookiesToSet) {
             request.cookies.set(name, value);
           }

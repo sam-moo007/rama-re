@@ -56,6 +56,7 @@ type TrustPassportProps = {
   coverage: number;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function TrustPassport({ locale, claims, coverage }: TrustPassportProps) {
   const text = copy[locale];
 

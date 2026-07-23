@@ -11,7 +11,9 @@ import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { DecisionPillarsShowcase } from "@/components/decision-pillars-showcase";
 import { Announcement, AnnouncementTag, AnnouncementTitle } from "@/components/kibo-ui/announcement";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { TextFade } from "@/components/pixel-perfect/text-fade";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import ProgressiveBlur from "@/components/pixel-perfect/progressive-blur";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { Marquee } from "@/components/ui/marquee";

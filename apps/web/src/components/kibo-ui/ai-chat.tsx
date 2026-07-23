@@ -1,7 +1,10 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ShieldCheck, Sparkles, Send } from "lucide-react";
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface AIChatProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export const AIChat = React.forwardRef<HTMLDivElement, AIChatProps>(

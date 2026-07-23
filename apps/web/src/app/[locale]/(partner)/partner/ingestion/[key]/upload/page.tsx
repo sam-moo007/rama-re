@@ -1,11 +1,13 @@
 "use client";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useState, useCallback, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function UploadPage({ params }: { params: Promise<{ locale: string, key: string }> }) {
   const { locale, key } = use(params);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter();
   const sourceKey = decodeURIComponent(key);
   

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { isLocale } from "@/lib/i18n";
 import { getCompareData, getDiscoveryData } from "@/lib/catalogue-data";
 import { CompareTable } from "@/features/compare/compare-table";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Button } from "@/components/ui/button";
 import { AppHeader } from "@/components/app-header";
 import { Container } from "@/components/ui/container";

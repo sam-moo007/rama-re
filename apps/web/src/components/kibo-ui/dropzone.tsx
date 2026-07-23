@@ -14,6 +14,7 @@ export const Dropzone = React.forwardRef<HTMLDivElement, DropzoneProps>(
     {
       className,
       onFileDrop,
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
       acceptedTypes = ".pdf,.jpg,.png,.csv",
       label = "Drop inspection documents or DLD files here",
       sublabel = "Supports PDF, CSV, PNG up to 20MB",

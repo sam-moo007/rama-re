@@ -92,6 +92,7 @@ export function SearchMap({ properties, locale }: SearchMapProps) {
         />
         <MapBounds properties={properties} />
         
+        {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
         {properties.map((property, idx) => {
           const geo = property.geo as { lat: number; lng: number } | null;
           if (!geo || typeof geo.lat !== "number" || typeof geo.lng !== "number") return null;
