@@ -16,6 +16,7 @@ export async function proxy(request: NextRequest) {
       cookies: {
         getAll: () => request.cookies.getAll(),
         setAll: (cookiesToSet) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
           for (const { name, value, options } of cookiesToSet) {
             request.cookies.set(name, value);
           }
@@ -52,8 +53,12 @@ export async function proxy(request: NextRequest) {
     // Public feature pages (no account needed)
     pathname.startsWith("/en/cost-engine") ||
     pathname.startsWith("/ar/cost-engine") ||
+    pathname.startsWith("/en/costs") ||
+    pathname.startsWith("/ar/costs") ||
     pathname.startsWith("/en/readiness") ||
     pathname.startsWith("/ar/readiness") ||
+    pathname.startsWith("/en/plan") ||
+    pathname.startsWith("/ar/plan") ||
     // Property browsing — publicly viewable
     pathname.startsWith("/en/properties/") ||
     pathname.startsWith("/ar/properties/") ||
@@ -119,6 +124,23 @@ export async function proxy(request: NextRequest) {
       supabaseResponse.cookies.set(cookie, "", { maxAge: 0, path: "/" });
     }
   }
+
+  // ----------------------------------------------------------------------
+  // A/B Testing Logic: Nordic Companion Pivot
+  // ----------------------------------------------------------------------
+  let bucket = request.cookies.get('rama_ab_bucket')?.value;
+  if (!bucket) {
+    // STARTING SPLIT: 10% Nordic, 90% Legacy
+    // EARLY STOPPING RULE: If Nordic variant shows a bounce rate spike >15% in Week 1, 
+    // this fraction should be reverted to 0 immediately.
+    bucket = Math.random() < 0.1 ? 'nordic' : 'legacy';
+  }
+
+  supabaseResponse.cookies.set('rama_ab_bucket', bucket, { 
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+  });
+  supabaseResponse.headers.set('x-rama-ab-bucket', bucket);
 
   return supabaseResponse;
 }

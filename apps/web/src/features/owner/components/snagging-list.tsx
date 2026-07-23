@@ -67,7 +67,7 @@ export function SnaggingList({ locale }: SnaggingListProps) {
             </div>
             
             <div className="text-right">
-              <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium mb-1
+              <span className={`inline-block px-2.5 py-1 rounded-none text-xs font-medium mb-1
                 ${item.status === 'resolved' ? 'bg-green-100 text-green-700' : 
                   item.status === 'in-progress' ? 'bg-amber-100 text-amber-700' : 
                   'bg-red-100 text-red-700'}`}>

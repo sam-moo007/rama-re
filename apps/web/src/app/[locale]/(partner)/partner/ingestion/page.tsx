@@ -61,8 +61,8 @@ export default function IngestionSourcesPage({ params }: { params: Promise<{ loc
               <div>
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-slate-900">{source.displayName.en}</h3>
-                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                    source.state === 'active' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-800'
+                  <span className={`inline-flex items-center rounded px-2.5 py-0.5 text-xs font-semibold ${
+                    source.state === 'active' ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : 'bg-surface text-ink border border-border'
                   }`}>
                     {source.state}
                   </span>

@@ -165,11 +165,11 @@ export const PropertyShortlistMineResponseSchema = z.object({
 });
 
 export const PropertyCompareRequestSchema = z.object({
-  slugs: z.array(z.string().min(1)).min(2).max(4).refine((items) => new Set(items).size === items.length, "Compare properties must be unique."),
+  slugs: z.array(z.string().min(1)).min(2).max(3).refine((items) => new Set(items).size === items.length, "Compare properties must be unique."),
 });
 
 export const PropertyCompareResponseSchema = z.object({
-  items: z.array(PropertySearchResultItemSchema).min(2).max(4),
+  items: z.array(PropertySearchResultItemSchema).min(2).max(3),
   generatedAt: z.string().datetime(),
   briefVersionApplied: z.number().int().positive().nullable(),
   searchVersion: z.literal("rama.catalogue.phase1.v2"),

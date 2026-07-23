@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   images: {
     formats: ["image/avif", "image/webp"],
+    qualities: [75, 90],
     remotePatterns: [
       {
         protocol: "https",
@@ -16,7 +17,7 @@ const nextConfig: NextConfig = {
     ],
     localPatterns: [
       {
-        pathname: "/images/**",
+        pathname: "/**",
       },
     ],
   },
@@ -45,12 +46,58 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: '/:locale(en|ar)/discover',
+        destination: '/:locale/homes',
+        permanent: true,
+      },
+      {
+        source: '/discover',
+        destination: '/en/homes',
+        permanent: true,
+      },
+      {
+        source: '/:locale(en|ar)/cost-engine',
+        destination: '/:locale/costs',
+        permanent: true,
+      },
+      {
+        source: '/cost-engine',
+        destination: '/en/costs',
+        permanent: true,
+      },
+      {
+        source: '/:locale(en|ar)/decision-room/:slug',
+        destination: '/:locale/homes/:slug',
+        permanent: true,
+      },
+      {
+        source: '/decision-room/:slug',
+        destination: '/en/homes/:slug',
+        permanent: true,
+      },
+      {
+        source: '/:locale(en|ar)/brief',
+        destination: '/:locale/plan',
+        permanent: true,
+      },
+      {
+        source: '/brief',
+        destination: '/en/plan',
+        permanent: true,
+      },
+    ];
+  },
   output: "standalone",
   turbopack: {},
 };
 
 // @ts-expect-error - next-pwa is not fully typed for Next.js 15
 import withPWAInit from "next-pwa";
+// @ts-expect-error - cache types missing
+import defaultCache from "next-pwa/cache";
 
 const withPWA = withPWAInit({
   dest: "public",
@@ -58,7 +105,14 @@ const withPWA = withPWAInit({
   register: true,
   skipWaiting: true,
   buildExcludes: [/middleware-manifest\.json$/],
-  publicExcludes: ['!noprecache/**/*']
+  publicExcludes: ['!noprecache/**/*'],
+  runtimeCaching: [
+    {
+      urlPattern: /^\/api\//,
+      handler: 'NetworkOnly',
+    },
+    ...defaultCache.filter((c: any) => c.options?.cacheName !== "apis" && c.options?.cacheName !== "others")
+  ],
 });
 
 export default withPWA(nextConfig);

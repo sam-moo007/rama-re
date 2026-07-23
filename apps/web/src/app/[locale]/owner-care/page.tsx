@@ -132,7 +132,7 @@ export default async function OwnerCarePage(props: {
               }`}
             >
               <div
-                className={`w-11 h-11 rounded-full flex items-center justify-center mb-3 font-bold text-lg ${
+                className={`w-11 h-11 rounded-none flex items-center justify-center mb-3 font-bold text-lg ${
                   step.active
                     ? "bg-[#b56f49] text-white"
                     : step.done
@@ -188,7 +188,7 @@ export default async function OwnerCarePage(props: {
                   <span className={`text-xs font-bold ${PRIORITY_STYLE[ticket.priority]}`}>
                     {ticket.priority.toUpperCase()}
                   </span>
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${STATUS_STYLE[ticket.status]}`}>
+                  <span className={`px-2.5 py-1 rounded-none text-xs font-bold ${STATUS_STYLE[ticket.status]}`}>
                     {STATUS_LABEL[ticket.status]}
                   </span>
                 </div>

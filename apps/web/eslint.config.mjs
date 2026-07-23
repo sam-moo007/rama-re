@@ -8,7 +8,7 @@ import nextTypeScript from "eslint-config-next/typescript";
 export default defineConfig([
   ...nextVitals,
   ...nextTypeScript,
-  globalIgnores([".next/**", "next-env.d.ts", "storybook-static/**", "playwright-report/**", "test-results/**"]),
+  globalIgnores([".next/**", "next-env.d.ts", "storybook-static/**", "playwright-report/**", "test-results/**", "public/service-worker.js", "public/workbox-*.js"]),
   ...storybook.configs["flat/recommended"],
   {
     rules: {

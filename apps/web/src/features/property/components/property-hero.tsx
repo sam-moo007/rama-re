@@ -4,22 +4,22 @@ import type { PropertyDecisionRoom } from "@rama/contracts";
 import {
   ArrowLeftRight,
   Bookmark,
-  Check,
-  CircleDashed,
-  Clock3,
+  CheckCircle2,
+  Clock,
   MapPin,
   MessageCircleMore,
+  ShieldCheck,
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-
-import { Badge } from "@/components/ui/badge";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Card } from "@/components/ui/card";
+
 import { formatAed, formatDate } from "@/lib/format";
 import { copy, localize, type Locale } from "@/lib/i18n";
 
-// Maps slugs → gallery images (all from /public/images)
 const GALLERY: Record<string, { src: string; label: { en: string; ar: string } }[]> = {
   "residence-1204": [
     { src: "/images/property-living-room.jpg", label: { en: "Living Room", ar: "غرفة المعيشة" } },
@@ -56,126 +56,136 @@ type PropertyHeroProps = {
 export function PropertyHero({ locale, property }: PropertyHeroProps) {
   const text = copy[locale];
   const [activeIdx, setActiveIdx] = useState(0);
+  const isAr = locale === "ar";
   const gallery = GALLERY[property.slug] ?? DEFAULT_GALLERY;
   const activeImage = gallery[activeIdx] || DEFAULT_GALLERY[0]!;
 
+  const verifiedCount = property.claims.filter((c) => c.status === "verified").length;
+
   return (
-    <section className="propertyHero" aria-labelledby="property-title">
-      {/* Media column */}
-      <div className="propertyMedia" aria-label={locale === "ar" ? "وسائط الوحدة الفعلية" : "Exact-unit media"}>
-        <div className="mediaMetaRow">
-          <Badge className="representationBadge" variant="outline">
-            <Check aria-hidden="true" size={14} />
-            {locale === "ar" ? "الوحدة الفعلية" : "Exact unit"}
-          </Badge>
-          <span className="captureDate">
-            <Clock3 aria-hidden="true" size={14} />
-            {locale === "ar" ? "تم التصوير" : "Captured"} {formatDate(property.media.capturedAt, locale)}
-          </span>
-        </div>
+    <section className="py-8 lg:py-12 border-b border-border" aria-labelledby="property-title">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        
+        {/* Left Column: Property Summary & Specs */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-xs text-brand font-semibold tracking-wider uppercase">
+              <MapPin className="size-3.5 shrink-0" />
+              <span>{localize(property.community, locale)}</span>
+            </div>
+            
+            <h1 id="property-title" className="text-3xl sm:text-4xl font-serif text-ink tracking-tight font-light leading-tight">
+              {localize(property.name, locale)}
+            </h1>
 
-        {/* Main image */}
-        <div className="architecturalView group" style={{ background: "#1a1e1b", position: "relative" }}>
-          <Image
-            key={activeImage.src}
-            src={activeImage.src}
-            alt={`${activeImage.label[locale]} — ${localize(property.name, locale)}`}
-            fill
-            priority={activeIdx === 0}
-            quality={90}
-            style={{ objectFit: "cover" }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 40%)",
-              pointerEvents: "none",
-            }}
-          />
-          
-          {/* Interactive 360 Viewer Sync */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10">
-            <button 
-              type="button"
-              className="bg-black/60 hover:bg-blue-600 text-white backdrop-blur-sm rounded px-4 py-2 flex items-center gap-2 transition-all transform hover:scale-105"
-              onClick={() => setActiveIdx((prev) => (prev + 1) % gallery.length)}
-              aria-label="Rotate 360 View"
+            <p className="text-2xl font-mono font-bold text-ink pt-1">
+              {formatAed(property.priceAed, locale)}
+            </p>
+          </div>
+
+          {/* DLD Verification Box */}
+          <Card className="bg-surface-subtle p-4 space-y-2 shadow-none border-border">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-ink text-xs font-semibold">
+                <ShieldCheck className="size-4 text-emerald-600 shrink-0" />
+                <span>{isAr ? "سجل التحقق الرسمي" : "RAMA Verified Ledger"}</span>
+              </div>
+              <span className="text-[10px] font-semibold text-brand bg-brand/10 px-2 py-0.5 border border-brand/20">
+                {verifiedCount}/{property.claims.length} {isAr ? "حقائق موثقة" : "Facts Confirmed"}
+              </span>
+            </div>
+            <p className="text-xs text-text leading-relaxed">
+              {isAr
+                ? "تمت مطابقة سند الملكية وحساب الضمان ومساحة البناء مع سجلات دائرة الأراضي والأملاك."
+                : "Title deed, escrow account, and building area cross-checked with official Dubai Land Dept ledgers."}
+            </p>
+          </Card>
+
+          {/* Key Fit Reasons */}
+          <div className="space-y-3 pt-1">
+            <p className="text-xs uppercase tracking-widest font-semibold text-muted">
+              {text.fit}
+            </p>
+            <ul className="space-y-2 text-xs text-text">
+              {property.fitReasons.map((reason) => (
+                <li key={reason.en} className="flex items-start gap-2">
+                  <CheckCircle2 className="size-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>{localize(reason, locale)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Action CTAs */}
+          <div className="flex items-center gap-3 pt-2">
+            <Button render={<a href="#advisor" />} className="flex-1 text-xs uppercase tracking-wider font-bold h-12">
+              <MessageCircleMore className="size-4 me-2 shrink-0" />
+              <span>{isAr ? "التحقق من التوفر" : "Check availability"}</span>
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
+              className="h-12 w-12 text-ink hover:text-brand"
+              aria-label={text.save}
             >
-              <ArrowLeftRight size={16} />
-              {locale === "ar" ? "تدوير العرض والتزامن" : "Rotate 360 & Sync"}
-            </button>
-          </div>
-
-          <div className="viewCaption" style={{ color: "#f0ece3", background: "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.2)" }}>
-            {activeImage.label[locale]}
-          </div>
-        </div>
-
-        {/* Thumbnail rail */}
-        <div className="mediaRail" aria-label={locale === "ar" ? "طرق العرض" : "Media views"}>
-          {gallery.map((item, i) => (
-            <button
-              key={item.src}
-              className={`mediaThumb${i === activeIdx ? " active" : ""}`}
-              type="button"
-              onClick={() => setActiveIdx(i)}
-              aria-label={`${locale === "ar" ? "عرض" : "View"} ${item.label[locale]}`}
-              aria-current={i === activeIdx ? "true" : undefined}
+              <Bookmark className="size-4" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
+              className="h-12 w-12 text-ink hover:text-brand"
+              aria-label={text.compare}
             >
-              0{i + 1} <span>{item.label[locale]}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Summary column */}
-      <div className="heroSummary">
-        <p className="eyebrow">RAMA / PROPERTY DECISION RECORD</p>
-        <div className="locationLine">
-          <MapPin aria-hidden="true" size={15} strokeWidth={1.6} />
-          {localize(property.community, locale)}
-        </div>
-        <h1 id="property-title">{localize(property.name, locale)}</h1>
-        <p className="propertyPrice">{formatAed(property.priceAed, locale)}</p>
-
-        <div className="coverageBlock">
-          <div className="coverageHeading">
-            <span><strong>{property.evidenceCoverage}%</strong> {text.evidenceComplete}</span>
-            <span className="evidenceState"><span aria-hidden="true" /> {locale === "ar" ? "منشور" : "Published"}</span>
+              <ArrowLeftRight className="size-4" />
+            </Button>
           </div>
-          <Progress className="ramaProgress" value={property.evidenceCoverage} aria-label={`${property.evidenceCoverage}% ${text.evidenceComplete}`} />
-          <p>{text.evidenceDisclaimer}</p>
         </div>
 
-        <div className="fitSnapshot">
-          <h2>{text.fit}</h2>
-          <ul>
-            {property.fitReasons.map((reason) => (
-              <li key={reason.en}>
-                <Check aria-hidden="true" size={17} />
-                <span>{localize(reason, locale)}</span>
-              </li>
+        {/* Right Column: Sharp Framed Gallery */}
+        <div className="lg:col-span-7 space-y-3">
+          <div className="relative w-full h-[400px] lg:h-[460px] overflow-hidden border border-border shadow-md rounded-none group bg-surface">
+            <Image
+              key={activeImage.src}
+              src={activeImage.src}
+              alt={`${activeImage.label[locale]} — ${localize(property.name, locale)}`}
+              fill
+              priority={activeIdx === 0}
+              quality={90}
+              sizes="(max-width: 1024px) 100vw, 55vw"
+              className="object-cover object-center transition-transform duration-1000 group-hover:scale-[1.02]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+
+            <div className="absolute top-4 start-4 bg-surface/90 backdrop-blur-sm px-3 py-1.5 border border-border text-ink text-[11px] font-medium tracking-wide">
+              {activeImage.label[locale]}
+            </div>
+
+            <div className="absolute bottom-4 start-4 bg-surface/90 backdrop-blur-sm px-3 py-1.5 border border-border text-text text-[10px] uppercase font-mono tracking-wider flex items-center gap-2">
+              <Clock className="size-3 text-brand" />
+              <span>{isAr ? "تم التصوير" : "Captured"} {formatDate(property.media.capturedAt, locale)}</span>
+            </div>
+          </div>
+
+          {/* Thumbnail Selector Rail */}
+          <div className="grid grid-cols-4 gap-3">
+            {gallery.map((item, i) => (
+              <button
+                key={item.src}
+                type="button"
+                onClick={() => setActiveIdx(i)}
+                className={`p-2 border text-start transition-all cursor-pointer ${
+                  i === activeIdx
+                    ? "bg-surface border-brand shadow-sm text-ink border-s-2"
+                    : "bg-surface-subtle border-border text-muted hover:border-brand/40 hover:text-text"
+                }`}
+              >
+                <p className="text-[10px] font-mono font-bold">0{i + 1}</p>
+                <p className="text-[11px] font-medium truncate">{item.label[locale]}</p>
+              </button>
             ))}
-          </ul>
-          <div className="uncertainConstraint">
-            <CircleDashed aria-hidden="true" size={18} />
-            <span><strong>{text.uncertain}</strong>{localize(property.uncertainConstraint, locale)}</span>
           </div>
         </div>
 
-        <div className="heroActions">
-          <a className="askButton" href="#advisor">
-            <MessageCircleMore aria-hidden="true" size={18} />
-            {text.ask}
-          </a>
-          <Button className="secondaryButton" size="lg" variant="outline" type="button">
-            <Bookmark aria-hidden="true" size={17} />{text.save}
-          </Button>
-          <Button className="secondaryButton" size="lg" variant="outline" type="button">
-            <ArrowLeftRight aria-hidden="true" size={17} />{text.compare}
-          </Button>
-        </div>
       </div>
     </section>
   );

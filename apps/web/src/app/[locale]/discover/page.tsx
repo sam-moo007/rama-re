@@ -1,22 +1,19 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-
-import { DiscoveryExperience } from "@/features/discovery/components/discovery-experience";
-import { getDiscoveryData, type DiscoverySearchParams } from "@/lib/catalogue-data";
-import { isLocale } from "@/lib/i18n";
-
-export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Discover homes", robots: { index: false, follow: false } };
+import { redirect } from "next/navigation";
 
 type Props = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<DiscoverySearchParams>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export default async function DiscoverPage({ params, searchParams }: Props) {
-  const { locale: value } = await params;
-  if (!isLocale(value)) notFound();
-  const data = await getDiscoveryData(await searchParams);
-  return <DiscoveryExperience initialSearch={data.search} initialShortlist={data.shortlist.shortlist} locale={value} />;
+  const { locale } = await params;
+  const params_ = new URLSearchParams();
+  const sp = await searchParams as Record<string, string | string[] | undefined>;
+  for (const [key, value] of Object.entries(sp)) {
+    if (value === undefined) continue;
+    const values = Array.isArray(value) ? value : [value];
+    for (const v of values) params_.append(key, v);
+  }
+  const search = params_.toString();
+  redirect(`/${locale}/homes${search ? `?${search}` : ""}` as any);
 }
-

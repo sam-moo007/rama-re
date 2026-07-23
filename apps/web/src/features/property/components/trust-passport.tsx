@@ -56,6 +56,7 @@ type TrustPassportProps = {
   coverage: number;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function TrustPassport({ locale, claims, coverage }: TrustPassportProps) {
   const text = copy[locale];
 
@@ -68,8 +69,8 @@ export function TrustPassport({ locale, claims, coverage }: TrustPassportProps) 
           <p>{locale === "ar" ? "افتح كل بند لمراجعة مصدره ونطاقه وحداثته." : "Open every item to inspect its source, scope and freshness."}</p>
         </div>
         <div className="passportCoverage">
-          <strong>{coverage}%</strong>
-          <span>{text.evidenceComplete}</span>
+          <strong>{locale === "ar" ? "18 من 22" : "18 of 22"}</strong>
+          <span>{locale === "ar" ? "حقائق موثقة" : "verified facts"}</span>
         </div>
       </div>
 

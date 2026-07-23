@@ -22,3 +22,11 @@ tests_archive/
 .agents/
 playwright-report/
 storybook-static/
+
+# Auto-generated and temporary artifacts
+.superdesign/
+tmp-pixel-perfect/
+apps/web/public/workbox-*.js
+apps/web/public/sw.js
+apps/web/public/sw.js.map
+.github/skills/impeccable/scripts/

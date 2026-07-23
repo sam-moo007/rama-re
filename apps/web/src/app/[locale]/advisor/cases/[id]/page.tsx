@@ -40,7 +40,7 @@ export default async function AdvisorCasePage({ params }: Props) {
           <h1 className="text-xl font-bold tracking-tight">
             {isAr ? "رقم القضية:" : "Case ID:"} {id}
           </h1>
-          <span className="px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider">
+          <span className="px-2.5 py-1 rounded-none bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider">
             {caseData.status}
           </span>
         </div>
@@ -75,8 +75,8 @@ export default async function AdvisorCasePage({ params }: Props) {
               </div>
               <div>
                 <p className="text-xs text-slate-500 mb-2">{isAr ? "جاهزية القرار" : "Decision Readiness"}</p>
-                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-green-500 rounded-full" style={{ width: `${caseData.progress}%` }} />
+                <div className="h-2 w-full bg-slate-100 rounded-none overflow-hidden">
+                  <div className="h-full bg-green-500 rounded-none" style={{ width: `${caseData.progress}%` }} />
                 </div>
               </div>
             </div>
@@ -87,7 +87,7 @@ export default async function AdvisorCasePage({ params }: Props) {
               <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">
                 {isAr ? "الأسئلة المعلقة" : "Open Questions"}
               </h2>
-              <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">2</span>
+              <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-none font-bold">2</span>
             </div>
             <ul className="space-y-3">
               <li className="p-3 rounded border border-amber-200 bg-amber-50 text-sm">
@@ -125,14 +125,14 @@ export default async function AdvisorCasePage({ params }: Props) {
           <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50">
             {/* System Note */}
             <div className="flex justify-center">
-              <span className="text-xs bg-slate-200 text-slate-600 px-3 py-1 rounded-full font-medium">
+              <span className="text-xs bg-slate-200 text-slate-600 px-3 py-1 rounded-none font-medium">
                 {isAr ? "تم تعيين القضية لك" : "Case assigned to you"} — {caseData.lastUpdated}
               </span>
             </div>
             
             {/* Client Message */}
             <div className="flex gap-4">
-              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold shrink-0">
+              <div className="w-8 h-8 rounded-none bg-blue-100 flex items-center justify-center text-blue-700 font-bold shrink-0">
                 SA
               </div>
               <div className="bg-white border p-4 rounded rounded-tl-sm shadow-sm max-w-[80%]">
@@ -147,7 +147,7 @@ export default async function AdvisorCasePage({ params }: Props) {
 
             {/* Internal Note Mock */}
             <div className="flex gap-4 flex-row-reverse">
-              <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-white font-bold shrink-0">
+              <div className="w-8 h-8 rounded-none bg-slate-800 flex items-center justify-center text-white font-bold shrink-0">
                 ME
               </div>
               <div className="bg-amber-50 border border-amber-200 p-4 rounded rounded-tr-sm shadow-sm max-w-[80%]">

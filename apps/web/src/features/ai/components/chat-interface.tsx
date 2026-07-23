@@ -43,6 +43,7 @@ export function ChatInterface({ propertyId }: { propertyId: string }) {
           escalate: data.escalate
         }
       ]);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setMessages((prev) => [
         ...prev, 
@@ -57,7 +58,7 @@ export function ChatInterface({ propertyId }: { propertyId: string }) {
     <div className="flex flex-col h-[500px] w-full max-w-md bg-white border rounded shadow-lg overflow-hidden">
       <div className="bg-slate-900 text-white p-4 font-semibold flex items-center justify-between">
         <span>Verified AI Concierge</span>
-        <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-full border border-emerald-500/30">
+        <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-none border border-emerald-500/30">
           Strict Mode
         </span>
       </div>
@@ -94,8 +95,10 @@ export function ChatInterface({ propertyId }: { propertyId: string }) {
         ))}
         {isLoading && (
           <div className="flex items-start">
-            <div className="bg-white border text-slate-500 px-4 py-2 rounded rounded-bl-none shadow-sm flex gap-1">
-              <span className="animate-bounce">.</span><span className="animate-bounce" style={{animationDelay: "0.2s"}}>.</span><span className="animate-bounce" style={{animationDelay: "0.4s"}}>.</span>
+            <div className="bg-white border text-slate-500 px-4 py-2 rounded rounded-bl-none shadow-sm flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-slate-400 animate-pulse" />
+              <span className="h-2 w-2 rounded-full bg-slate-400 animate-pulse [animation-delay:200ms]" />
+              <span className="h-2 w-2 rounded-full bg-slate-400 animate-pulse [animation-delay:400ms]" />
             </div>
           </div>
         )}

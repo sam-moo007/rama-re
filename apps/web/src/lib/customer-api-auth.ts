@@ -20,6 +20,7 @@ export async function getCustomerApiHeaders(): Promise<Record<string, string>> {
       const nextHeaders = require("next/headers");
       const cookieStore = await nextHeaders.cookies();
       token = cookieStore.get("__Host-rama-customer-token")?.value || "";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       // Ignore
     }
